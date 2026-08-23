@@ -3,7 +3,9 @@
   --bg: #0a0a0c;
   --bg-elevated: #17171b;
   --fg: #f3f1ea;
-  --on-accent: #f3f1ea;
+  /* Near-black on the accent red scores 5.58:1; the off-white it replaced was
+     3.14:1 and failed WCAG AA for the small uppercase labels on accent buttons. */
+  --on-accent: #0a0a0c;
   --muted: #8b8b93;
   --accent: #ff3b30;
   --border: rgba(243, 241, 234, 0.14);

@@ -6,47 +6,73 @@ const stats = [
   { value: "41 / 12", label: "Sonnet / Haiku" },
 ];
 
-const pipeline = [
-  { step: "Creazione", detail: "L'agente di dominio produce il contenuto" },
-  { step: "Cross-Domain Check", detail: "Verifica di coerenza con il resto del mondo" },
-  { step: "Validazione QA", detail: "Controllo qualità e sicurezza" },
-  { step: "Approvazione", detail: "Il Director approva in batch, poi si archivia" },
+// Real roles, read out of roles.json in the repository.
+const departments = [
+  {
+    code: "dir",
+    name: "Direzione",
+    roles: ["Game Director", "Producer", "Art Director", "Narrative Director", "Technical Director", "Lead Game Designer", "Project Manager"],
+  },
+  {
+    code: "design",
+    name: "Game Design",
+    roles: ["World Designer", "Game Designer", "Systems Designer", "Quest Designer", "Character Designer", "Level Designer", "Encounter Designer"],
+  },
+  {
+    code: "narr",
+    name: "Narrativa",
+    roles: ["Narrative Designer", "Lore Designer", "Lore Writer", "Dialogue Writer", "Character Writer", "Content Writer", "Technical Designer"],
+  },
+  {
+    code: "viz",
+    name: "Visual & Audio",
+    roles: ["Concept Artist", "3D Character Artist", "3D Environment Artist", "Texture Artist", "Rigger", "Animator", "UI/UX Artist", "VFX Artist", "Sound Designer", "Composer", "Technical Artist"],
+  },
+  {
+    code: "qa",
+    name: "Quality",
+    roles: ["QA Lead", "QA Tester", "Narrative QA", "UX Researcher", "Cross-Domain Validator", "Security Guard"],
+  },
+  {
+    code: "biz",
+    name: "Business",
+    roles: ["Marketing Manager", "PR Manager", "Community Manager", "Data Analyst", "Live Ops Producer", "Customer Support", "Video Editor", "Localization Manager"],
+  },
+  {
+    code: "prog",
+    name: "Programmazione",
+    roles: ["Lead Programmer", "Gameplay Programmer", "UI Programmer", "AI Programmer", "Tools Programmer", "Audio Programmer"],
+  },
+  {
+    code: "kb",
+    name: "Infrastruttura",
+    roles: ["KB Librarian"],
+  },
 ];
 
-const departments = [
-  { code: "dir", name: "Direzione", count: 7 },
-  { code: "viz", name: "Visual & Audio", count: 11 },
-  { code: "biz", name: "Business", count: 8 },
-  { code: "design", name: "Game Design", count: 7 },
-  { code: "narr", name: "Narrativa", count: 7 },
-  { code: "prog", name: "Programmazione", count: 6 },
-  { code: "qa", name: "Quality", count: 6 },
-  { code: "kb", name: "Infrastruttura", count: 1 },
+// The lower half of the diagram: what happens to a piece of content once
+// a specialist has produced it.
+const gates = [
+  { name: "Creazione", detail: "Lo specialista di dominio produce il contenuto" },
+  { name: "Cross-domain check", detail: "Coerenza verificata contro il resto del mondo di gioco" },
+  { name: "Validazione QA", detail: "Controllo qualità e sicurezza" },
+  { name: "Approvazione", detail: "Il Director approva in batch" },
+  { name: "Knowledge Base", detail: "Archiviato in Markdown, su 20 domini" },
 ];
 ---
 <section id="studio" class="studio">
   <div class="studio-inner">
-    <header class="studio-head">
-      <p class="studio-tag" data-reveal>Progetto in evidenza / Open source</p>
-      <h2 data-reveal>Agentic Game Studio</h2>
-      <p class="studio-claim" data-reveal>
-        Uno studio di sviluppo videoludico AAA ricostruito come sistema multi-agente dentro Claude Code.
-        Non una chat a cui chiedere idee: una pipeline di pre-produzione che crea, valida e archivia.
-      </p>
-
-      <div class="studio-problem" data-reveal>
-        <p>
-          La pre-produzione è il collo di bottiglia dei team piccoli: mesi di brainstorming disperso,
-          lore che si contraddice, Game Design Document mai finiti. Qui ogni ruolo, dal Game Director
-          al Dialogue Writer, è un agente autonomo con autorità definita e accesso limitato alla
-          Knowledge Base condivisa.
-        </p>
-      </div>
-
-      <a class="btn btn-accent studio-cta" href="https://github.com/slammista/agentic-game-studio" target="_blank" rel="noopener">
-        Vedi su GitHub
-      </a>
-    </header>
+    <p class="studio-tag" data-reveal>Progetto in evidenza, open source</p>
+    <h2 data-reveal>Agentic Game Studio</h2>
+    <p class="studio-claim" data-reveal>
+      Uno studio di sviluppo videoludico ricostruito come sistema multi-agente dentro Claude Code.
+      Non una chat a cui chiedere idee: una pipeline di pre-produzione che crea, valida e archivia.
+    </p>
+    <p class="studio-problem" data-reveal>
+      La pre-produzione è il collo di bottiglia dei team piccoli: mesi di brainstorming disperso,
+      lore che si contraddice, Game Design Document mai finiti. Qui ogni ruolo è un agente autonomo
+      con autorità definita e accesso limitato alla Knowledge Base condivisa.
+    </p>
 
     <dl class="studio-stats">
       {stats.map((s) => (
@@ -57,36 +83,83 @@ const departments = [
       ))}
     </dl>
 
-    <div class="studio-block">
-      <h3 class="studio-sub" data-reveal>La pipeline</h3>
-      <ol class="pipeline">
-        {pipeline.map((p, i) => (
-          <li class="pipeline-step">
-            <span class="pipeline-index" aria-hidden="true">{i + 1}</span>
-            <span class="pipeline-name">{p.step}</span>
-            <span class="pipeline-detail">{p.detail}</span>
-          </li>
-        ))}
-      </ol>
-    </div>
+    <!-- The diagram traces one request through the studio, top to bottom. -->
+    <figure class="flow" aria-labelledby="flow-caption">
+      <figcaption id="flow-caption" class="flow-caption">
+        Il percorso di una richiesta: tu chiedi, il Director smista, i reparti lavorano in
+        parallelo, e niente entra nella Knowledge Base senza passare il QA.
+      </figcaption>
 
-    <div class="studio-block">
-      <h3 class="studio-sub" data-reveal>I dipartimenti</h3>
-      <ul class="depts">
-        {departments.map((d) => (
-          <li class="dept" data-reveal>
-            <span class="dept-code">{d.code}-</span>
-            <span class="dept-name">{d.name}</span>
-            <span class="dept-count">{d.count}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <div class="flow-diagram">
+        <div class="node node--entry" data-node>
+          <span class="node-label">La tua richiesta</span>
+        </div>
+
+        <div class="link" data-link><i></i></div>
+
+        <div class="node node--director" data-node>
+          <span class="node-label">Game Director</span>
+          <span class="node-sub">smista e arbitra</span>
+        </div>
+
+        <div class="link" data-link><i></i></div>
+
+        <div class="fan">
+          <div class="fan-rail" data-rail><i></i></div>
+          <ul class="fan-list">
+            {departments.map((d) => (
+              <li>
+                <button
+                  class="chip"
+                  type="button"
+                  data-dept={d.code}
+                  aria-expanded="false"
+                  aria-controls="dept-detail"
+                >
+                  <span class="chip-code">{d.code}</span>
+                  <span class="chip-name">{d.name}</span>
+                  <span class="chip-count">{d.roles.length}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Every panel is rendered up front and toggled with [hidden]: no innerHTML,
+             so Astro's scoped styles apply and the roles are in the DOM without JS. -->
+        <div class="detail" id="dept-detail" role="region" aria-live="polite">
+          <p class="detail-text" data-detail-default>
+            Ogni reparto legge soltanto il proprio dominio. Scegline uno per vedere chi ci lavora.
+          </p>
+          {departments.map((d) => (
+            <ul class="detail-roles" data-detail-for={d.code} hidden>
+              {d.roles.map((role) => <li>{role}</li>)}
+            </ul>
+          ))}
+        </div>
+
+        <div class="link" data-link><i></i></div>
+
+        <ol class="gates">
+          {gates.map((g, i) => (
+            <li class="gate" data-node>
+              <span class="gate-name">{g.name}</span>
+              <span class="gate-detail">{g.detail}</span>
+              {i < gates.length - 1 && <span class="gate-link" data-link><i></i></span>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </figure>
 
     <p class="studio-note" data-reveal>
-      I task ripetitivi e il QA girano su Haiku, la direzione creativa su Sonnet. Nessun agente carica
-      l'intera memoria del progetto: ognuno legge solo il proprio dominio.
+      I task ripetitivi e il QA girano su Haiku, la direzione creativa su Sonnet. Nessun agente
+      carica l'intera memoria del progetto.
     </p>
+
+    <a class="btn btn-accent studio-cta" href="https://github.com/slammista/agentic-game-studio" target="_blank" rel="noopener">
+      Vedi su GitHub
+    </a>
   </div>
 </section>
 
@@ -94,7 +167,7 @@ const departments = [
   .studio {
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, var(--bg-elevated), var(--bg) 70%);
+    background: linear-gradient(180deg, var(--bg-elevated), var(--bg) 60%);
   }
 
   .studio-inner {
@@ -113,35 +186,30 @@ const departments = [
     margin-bottom: 1.25rem;
   }
 
-  .studio-head h2 {
-    font-size: clamp(2.5rem, 7vw, 5.5rem);
+  .studio h2 {
+    font-size: clamp(2.5rem, 6.5vw, 5rem);
     margin-bottom: 1.5rem;
+    text-wrap: balance;
   }
 
   .studio-claim {
     font-size: clamp(1.05rem, 1.8vw, 1.3rem);
     max-width: 58ch;
+    text-wrap: pretty;
   }
 
   .studio-problem {
-    margin-top: 2rem;
-    padding-left: 1.5rem;
-    border-left: 2px solid var(--accent);
-  }
-  .studio-problem p {
+    margin-top: 1.75rem;
     color: var(--muted);
     max-width: 62ch;
-  }
-
-  .studio-cta {
-    margin-top: 2.5rem;
+    text-wrap: pretty;
   }
 
   .studio-stats {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1px;
-    margin-top: 4.5rem;
+    margin-top: 4rem;
     background: var(--border);
     border: 1px solid var(--border);
   }
@@ -170,120 +238,273 @@ const departments = [
     color: var(--muted);
   }
 
-  .studio-block {
-    margin-top: 4.5rem;
+  /* ---------- The flow diagram ---------- */
+
+  .flow {
+    margin: 5rem 0 0;
   }
 
-  .studio-sub {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
+  .flow-caption {
     color: var(--muted);
-    margin-bottom: 1.75rem;
+    max-width: 62ch;
+    margin-bottom: 3rem;
+    text-wrap: pretty;
   }
 
-  /* Pipeline: four stages that light up in order as the section scrolls past */
-  .pipeline {
-    list-style: none;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-  }
-  @media (min-width: 860px) {
-    .pipeline { grid-template-columns: repeat(4, 1fr); }
-  }
-
-  .pipeline-step {
-    background: var(--bg);
-    padding: 1.75rem 1.5rem;
+  .flow-diagram {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
-    position: relative;
-    transition: background 0.5s ease;
+    align-items: center;
   }
-  .pipeline-step.is-live {
-    background: var(--bg-elevated);
-  }
-  .pipeline-step::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    height: 2px;
-    width: 0%;
-    background: var(--accent);
-    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .pipeline-step.is-live::after {
+
+  .node {
     width: 100%;
+    max-width: 30rem;
+    text-align: center;
+    padding: 1.1rem 1.5rem;
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
   }
 
-  .pipeline-index {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    color: var(--accent);
+  .node--director {
+    border-color: var(--accent);
   }
 
-  .pipeline-name {
+  .node-label {
     font-family: var(--font-display);
     font-weight: 600;
     font-size: 1.05rem;
   }
 
-  .pipeline-detail {
-    font-size: 0.875rem;
+  .node-sub {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
     color: var(--muted);
-    line-height: 1.6;
   }
 
-  .depts {
+  /* Connectors: a hairline track with an accent fill that grows through it. */
+  .link {
+    width: 1px;
+    height: 3rem;
+    background: var(--border-strong);
+    position: relative;
+    overflow: hidden;
+  }
+  .link i {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+
+  .fan {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .fan-rail {
+    width: 100%;
+    max-width: 62rem;
+    height: 1px;
+    background: var(--border-strong);
+    position: relative;
+    overflow: hidden;
+  }
+  .fan-rail i {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleX(0);
+  }
+
+  .fan-list {
     list-style: none;
+    width: 100%;
+    max-width: 62rem;
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 0;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-top: none;
   }
   @media (min-width: 700px) {
-    .depts { grid-template-columns: repeat(2, 1fr); column-gap: 3rem; }
+    .fan-list { grid-template-columns: repeat(4, 1fr); }
   }
 
-  .dept {
+  .chip {
+    width: 100%;
+    height: 100%;
     display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-    padding: 0.9rem 0;
-    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    padding: 1.1rem 1rem;
+    background: var(--bg);
+    border: none;
+    border-top: 2px solid transparent;
+    color: var(--fg);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .chip:hover {
+    background: var(--bg-elevated);
+  }
+  .chip:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .chip.is-reached {
+    border-top-color: var(--accent);
+  }
+  .chip[aria-expanded="true"] {
+    background: var(--accent);
+    border-top-color: var(--accent);
+    color: var(--on-accent);
+  }
+  .chip[aria-expanded="true"] .chip-code,
+  .chip[aria-expanded="true"] .chip-count {
+    color: var(--on-accent);
   }
 
-  .dept-code {
+  .chip-code {
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     color: var(--accent);
-    min-width: 4.5rem;
   }
 
-  .dept-name {
-    flex: 1;
+  .chip-name {
+    font-size: 0.95rem;
+    line-height: 1.25;
   }
 
-  .dept-count {
+  .chip-count {
     font-family: var(--font-mono);
-    font-size: 0.85rem;
+    font-size: 0.72rem;
     color: var(--muted);
+    margin-top: auto;
+  }
+
+  .detail {
+    width: 100%;
+    max-width: 62rem;
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 1.4rem 1.25rem;
+    min-height: 5.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .detail-text {
+    color: var(--muted);
+    font-size: 0.95rem;
+    max-width: none;
+  }
+
+  .detail-roles {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  /* A class-level display would otherwise beat the [hidden] attribute. */
+  .detail-roles[hidden] {
+    display: none;
+  }
+  .detail-roles li {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+  }
+
+  .gates {
+    list-style: none;
+    width: 100%;
+    max-width: 30rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .gate {
+    width: 100%;
+    text-align: center;
+    padding: 1.1rem 1.5rem;
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    position: relative;
+  }
+
+  .gate-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  .gate-detail {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .gate-link {
+    display: block;
+    width: 1px;
+    height: 2.25rem;
+    background: var(--border-strong);
+    position: absolute;
+    left: 50%;
+    bottom: -2.25rem;
+    overflow: hidden;
+  }
+  .gate-link i {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+
+  .gate:not(:last-child) {
+    margin-bottom: 2.25rem;
+  }
+
+  /* A node the signal has reached */
+  .node.is-lit,
+  .gate.is-lit {
+    border-color: var(--accent);
+    background: var(--bg-elevated);
   }
 
   .studio-note {
-    margin-top: 3rem;
+    margin-top: 4rem;
     color: var(--muted);
     max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  .studio-cta {
+    margin-top: 2rem;
+    display: inline-block;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .pipeline-step,
-    .pipeline-step::after { transition: none; }
+    .chip { transition: none; }
   }
 </style>
 
@@ -293,21 +514,81 @@ const departments = [
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const steps = gsap.utils.toArray<HTMLElement>(".pipeline-step");
+  const diagram = document.querySelector<HTMLElement>(".flow-diagram");
+  const fallback = document.querySelector<HTMLElement>("[data-detail-default]");
+  const panels = gsap.utils.toArray<HTMLElement>("[data-detail-for]");
+  const chips = gsap.utils.toArray<HTMLButtonElement>(".chip");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (reduceMotion) {
-    steps.forEach((s) => s.classList.add("is-live"));
-  } else {
-    // Stages light up in sequence so the order of the pipeline is what the
-    // animation communicates, rather than decoration.
-    steps.forEach((step, i) => {
-      ScrollTrigger.create({
-        trigger: step,
-        start: "top 82%",
-        once: true,
-        onEnter: () => window.setTimeout(() => step.classList.add("is-live"), i * 160),
+  /* ---- Pick a department, see who actually works in it ---- */
+  chips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const code = chip.dataset.dept ?? "";
+      const wasOpen = chip.getAttribute("aria-expanded") === "true";
+      const open = wasOpen ? "" : code;
+
+      chips.forEach((c) => c.setAttribute("aria-expanded", String(c.dataset.dept === open)));
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.detailFor !== open;
       });
+      if (fallback) fallback.hidden = open !== "";
     });
+  });
+
+  /* ---- The signal travelling down the diagram ----
+     Scrubbed to scroll: the animation is the request moving through the studio,
+     in the order it actually happens. No pin: the hero already owns that device. */
+  if (diagram) {
+    const links = gsap.utils.toArray<HTMLElement>("[data-link] i", diagram);
+    const rail = diagram.querySelector<HTMLElement>("[data-rail] i");
+    const nodes = gsap.utils.toArray<HTMLElement>("[data-node]", diagram);
+
+    if (reduceMotion) {
+      gsap.set([...links, rail].filter(Boolean), { scaleX: 1, scaleY: 1 });
+      nodes.forEach((n) => n.classList.add("is-lit"));
+    } else {
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: diagram,
+          start: "top 78%",
+          end: "bottom 65%",
+          scrub: 0.5,
+        },
+      });
+
+      // entry -> director
+      tl.to(nodes[0], { duration: 0.1, onStart: () => nodes[0].classList.add("is-lit"), onReverseComplete: () => nodes[0].classList.remove("is-lit") }, 0);
+      tl.to(links[0], { scaleY: 1, duration: 0.6 }, 0.1);
+      tl.to(nodes[1], { duration: 0.1, onStart: () => nodes[1].classList.add("is-lit"), onReverseComplete: () => nodes[1].classList.remove("is-lit") }, 0.7);
+
+      // director -> the eight departments, fanning out along the rail
+      tl.to(links[1], { scaleY: 1, duration: 0.5 }, 0.85);
+      tl.to(rail, { scaleX: 1, duration: 0.7 }, 1.3);
+      // The chips are always readable; what animates is the signal reaching each
+      // department, not the content appearing.
+      chips.forEach((chip, i) => {
+        tl.to(chip, {
+          duration: 0.1,
+          onStart: () => chip.classList.add("is-reached"),
+          onReverseComplete: () => chip.classList.remove("is-reached"),
+        }, 1.6 + i * 0.08);
+      });
+
+      // departments -> the gates, one after another
+      tl.to(links[2], { scaleY: 1, duration: 0.5 }, 2.3);
+
+      const gateNodes = nodes.slice(2);
+      const gateLinks = links.slice(3);
+      gateNodes.forEach((gate, i) => {
+        const at = 2.75 + i * 0.55;
+        tl.to(gate, {
+          duration: 0.1,
+          onStart: () => gate.classList.add("is-lit"),
+          onReverseComplete: () => gate.classList.remove("is-lit"),
+        }, at);
+        if (gateLinks[i]) tl.to(gateLinks[i], { scaleY: 1, duration: 0.45 }, at + 0.1);
+      });
+    }
   }
 </script>
