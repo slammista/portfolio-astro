@@ -1,44 +1,69 @@
 ---
+const rowA = ["Power BI", "DAX", "Power Query", "Tableau", "Excel Avanzato", "SQL Server", "Oracle PL/SQL", "Talend", "DataStage", "Databricks"];
+const rowB = ["Python", "Pandas", "NumPy", "Scikit-learn", "SQL", "R", "Google Cloud Platform", "Azure", "ElasticSearch", "Git / GitHub"];
 ---
-<section id="skills" class="container">
-  <span class="label">// Competenze</span>
-  <h2 style="margin-bottom: 3rem;">Stack<br/>Tecnico</h2>
-  <div class="grid-2">
-    <div>
-      <h3 style="font-family: var(--font-mono); font-size: 1rem; text-transform: uppercase; margin-bottom: 1rem;">BI & Visualization</h3>
-      <ul class="skills-list" style="margin-bottom: 2rem;">
-        <li>Power BI</li>
-        <li>DAX</li>
-        <li>Power Query</li>
-        <li>Tableau</li>
-        <li>Excel Avanzato</li>
-      </ul>
-      <h3 style="font-family: var(--font-mono); font-size: 1rem; text-transform: uppercase; margin-bottom: 1rem;">Data Engineering</h3>
-      <ul class="skills-list">
-        <li>SQL Server</li>
-        <li>Oracle PL/SQL</li>
-        <li>Talend</li>
-        <li>DataStage</li>
-        <li>Databricks</li>
-      </ul>
+<section id="skills" class="container skills">
+  <h2 data-reveal>Stack tecnico</h2>
+
+  <div class="marquee" data-reveal>
+    <div class="marquee-track marquee-track--left">
+      {[...rowA, ...rowA].map((skill) => <span class="marquee-tag">{skill}</span>)}
     </div>
-    <div>
-      <h3 style="font-family: var(--font-mono); font-size: 1rem; text-transform: uppercase; margin-bottom: 1rem;">Programming</h3>
-      <ul class="skills-list" style="margin-bottom: 2rem;">
-        <li>Python</li>
-        <li>Pandas</li>
-        <li>NumPy</li>
-        <li>Scikit-learn</li>
-        <li>SQL</li>
-        <li>R</li>
-      </ul>
-      <h3 style="font-family: var(--font-mono); font-size: 1rem; text-transform: uppercase; margin-bottom: 1rem;">Cloud & Infra</h3>
-      <ul class="skills-list">
-        <li>Google Cloud Platform</li>
-        <li>Azure</li>
-        <li>ElasticSearch</li>
-        <li>Git / GitHub</li>
-      </ul>
+  </div>
+
+  <div class="marquee" data-reveal>
+    <div class="marquee-track marquee-track--right">
+      {[...rowB, ...rowB].map((skill) => <span class="marquee-tag">{skill}</span>)}
     </div>
   </div>
 </section>
+
+<style>
+  .skills {
+    overflow: hidden;
+  }
+
+  .marquee {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    padding: 1.75rem 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .marquee:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    gap: 1rem;
+    animation: marquee-left 38s linear infinite;
+  }
+  .marquee-track--right {
+    animation-name: marquee-right;
+  }
+
+  .marquee-tag {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    padding: 0.6rem 1.2rem;
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+  }
+
+  @keyframes marquee-left {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes marquee-right {
+    from { transform: translateX(-50%); }
+    to { transform: translateX(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; }
+    .marquee { overflow-x: auto; }
+  }
+</style>

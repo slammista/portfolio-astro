@@ -1,31 +1,316 @@
 ---
+const firstName = "Matteo";
+const lastName = "Aslam";
 ---
-<section id="hero" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
-  <div class="container">
-    <span class="label">Data & BI Professional</span>
-    <h1 style="margin-bottom: 1rem;">Matteo<br/>Aslam</h1>
-    <p style="font-size: 1.25rem; max-width: 50ch; margin-bottom: 3rem;">
-      Trasformo dati complessi in decisioni di business per aziende enterprise.
-    </p>
-    <div class="grid-3" style="margin-top: 4rem;">
-      <div>
-        <span class="label">Esperienza</span>
-        <p style="font-family: var(--font-mono); font-size: 2rem;">2+</p>
-        <p style="font-size: 0.875rem; color: var(--muted);">Anni di esperienza</p>
-      </div>
-      <div>
-        <span class="label">Clienti</span>
-        <p style="font-family: var(--font-mono); font-size: 2rem;">3</p>
-        <p style="font-size: 0.875rem; color: var(--muted);">Clienti enterprise</p>
-      </div>
-      <div>
-        <span class="label">Certificazione</span>
-        <p style="font-family: var(--font-mono); font-size: 2rem;">PL-300</p>
-        <p style="font-size: 0.875rem; color: var(--muted);">Microsoft Certified</p>
-      </div>
+<section class="cinema" aria-label="Apertura">
+  <div class="cinema-pin">
+    <canvas class="cinema-canvas" aria-hidden="true"></canvas>
+    <div class="cinema-vignette" aria-hidden="true"></div>
+
+    <div class="cinema-content">
+      <h1 class="cinema-title">
+        <span class="sr-only">{firstName} {lastName}</span>
+        <span class="cinema-word" aria-hidden="true">
+          {firstName.split("").map((c) => <span class="cinema-char">{c}</span>)}
+        </span>
+        <span class="cinema-word" aria-hidden="true">
+          {lastName.split("").map((c) => <span class="cinema-char">{c}</span>)}
+        </span>
+      </h1>
+
+      <p class="cinema-sub" data-cinema-reveal>
+        Data & Business Analyst. Trasformo dati complessi in decisioni per aziende enterprise.
+      </p>
+
+      <a href="#about" class="cinema-cta" data-cinema-reveal>Guarda il percorso</a>
     </div>
-    <div style="margin-top: 4rem;">
-      <a href="/cv-matteo-aslam.pdf" class="btn" download>Scarica CV</a>
-    </div>
+
+    <div class="cinema-progress" aria-hidden="true"><span class="cinema-progress-fill"></span></div>
   </div>
 </section>
+
+<style>
+  .cinema {
+    position: relative;
+    background: var(--bg);
+  }
+
+  .cinema-pin {
+    position: relative;
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cinema-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+
+  .cinema-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 45%, var(--bg) 100%);
+    pointer-events: none;
+  }
+
+  .cinema-content {
+    position: relative;
+    z-index: 2;
+    width: 90%;
+    max-width: 1160px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cinema-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    font-size: clamp(3.25rem, 11vw, 9.5rem);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 clamp(0.6rem, 2vw, 2rem);
+  }
+
+  .cinema-word {
+    display: inline-flex;
+  }
+
+  .cinema-char {
+    display: inline-block;
+    will-change: transform, opacity;
+  }
+
+  .cinema-sub {
+    margin-top: 2rem;
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    max-width: 46ch;
+    color: var(--fg);
+  }
+
+  .cinema-cta {
+    margin-top: 2.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 1rem 2rem;
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .cinema-cta:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .cinema-progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    z-index: 2;
+  }
+  .cinema-progress-fill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transform-origin: left;
+  }
+
+  @media (max-width: 640px) {
+    .cinema-title { font-size: clamp(2.5rem, 14vw, 4.5rem); }
+  }
+</style>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const section = document.querySelector<HTMLElement>(".cinema");
+  const pin = document.querySelector<HTMLElement>(".cinema-pin");
+  const canvas = document.querySelector<HTMLCanvasElement>(".cinema-canvas");
+  const progressFill = document.querySelector<HTMLElement>(".cinema-progress-fill");
+  const chars = gsap.utils.toArray<HTMLElement>(".cinema-char");
+  const reveals = gsap.utils.toArray<HTMLElement>(".cinema-content [data-cinema-reveal]");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- Generative canvas: a data-network that resolves from noise into signal ---- */
+  let phase = 0;
+
+  if (section && pin && canvas) {
+    const ctx = canvas.getContext("2d");
+
+    if (ctx) {
+      let width = 0;
+      let height = 0;
+      let dpr = 1;
+      let nodes: {
+        sx: number; sy: number; tx: number; ty: number;
+        x: number; y: number; r: number; driftPhase: number; driftSpeed: number;
+      }[] = [];
+
+      const NODE_COUNT = 42;
+
+      function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = pin!.clientWidth;
+        height = pin!.clientHeight;
+        canvas!.width = width * dpr;
+        canvas!.height = height * dpr;
+        ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function seedNodes() {
+        const cols = 7;
+        nodes = Array.from({ length: NODE_COUNT }, (_, i) => {
+          const col = i % cols;
+          const row = Math.floor(i / cols);
+          const rows = Math.ceil(NODE_COUNT / cols);
+          return {
+            sx: Math.random() * width,
+            sy: Math.random() * height,
+            tx: (width / (cols + 1)) * (col + 1),
+            ty: (height / (rows + 1)) * (row + 1) + Math.sin(col * 0.9) * height * 0.1,
+            x: 0,
+            y: 0,
+            r: 1.4 + Math.random() * 1.8,
+            driftPhase: Math.random() * Math.PI * 2,
+            driftSpeed: 0.35 + Math.random() * 0.5,
+          };
+        });
+      }
+
+      function draw(time: number) {
+        if (!ctx || !canvas) return;
+        ctx.clearRect(0, 0, width, height);
+        const t = time * 0.001;
+
+        for (const n of nodes) {
+          const drift = 1 - phase * 0.6;
+          const driftX = Math.sin(t * n.driftSpeed + n.driftPhase) * 7 * drift;
+          const driftY = Math.cos(t * n.driftSpeed * 0.8 + n.driftPhase) * 7 * drift;
+          n.x = n.sx + (n.tx - n.sx) * phase + driftX;
+          n.y = n.sy + (n.ty - n.sy) * phase + driftY;
+        }
+
+        ctx.lineWidth = 1;
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const a = nodes[i];
+            const b = nodes[j];
+            const dx = a.x - b.x;
+            const dy = a.y - b.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const maxDist = 85 + phase * 45;
+            if (dist < maxDist) {
+              const alpha = (1 - dist / maxDist) * (0.06 + phase * 0.16);
+              ctx.strokeStyle = `rgba(243, 241, 234, ${alpha})`;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        for (const n of nodes) {
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(255, 59, 48, ${0.32 + phase * 0.5})`;
+          ctx.arc(n.x, n.y, n.r + phase * 0.7, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      resize();
+      seedNodes();
+      window.addEventListener("resize", () => {
+        resize();
+        seedNodes();
+      });
+
+      if (!reduceMotion) {
+        requestAnimationFrame(draw);
+      } else {
+        phase = 1;
+        draw(0);
+      }
+    }
+
+    /* ---- Scroll-scrubbed cinematic timeline ---- */
+    if (!reduceMotion) {
+      gsap.set(chars, { yPercent: 120, opacity: 0 });
+      gsap.set(canvas, { opacity: 0 });
+      gsap.set(reveals, { opacity: 0, y: 28 });
+
+      const phaseDriver = { t: 0 };
+
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: () => "+=" + Math.max(window.innerHeight * 4, 2600),
+          scrub: 0.6,
+          pin: pin,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            if (progressFill) progressFill.style.width = `${self.progress * 100}%`;
+          },
+        },
+      });
+
+      // 0% -> 20%: title assembles
+      tl.to(chars, { yPercent: 0, opacity: 1, stagger: 0.02, duration: 2 }, 0);
+
+      // 20% -> 40%: title breaks apart
+      tl.to(
+        chars,
+        {
+          x: () => gsap.utils.random(-260, 260),
+          y: () => gsap.utils.random(-180, 180),
+          rotation: () => gsap.utils.random(-50, 50),
+          opacity: 0,
+          stagger: { each: 0.012, from: "random" },
+          duration: 2,
+        },
+        2
+      );
+
+      // 40% -> 60%: the data visual emerges
+      tl.to(canvas, { opacity: 1, duration: 2 }, 4);
+
+      // 60% -> 80%: the visual resolves from noise into signal
+      tl.to(phaseDriver, { t: 1, duration: 2, onUpdate: () => (phase = phaseDriver.t) }, 6);
+
+      // 80% -> 100%: supporting text reveals, new scene follows
+      tl.to(reveals, { opacity: 1, y: 0, stagger: 0.12, duration: 2 }, 8);
+    } else {
+      gsap.set(chars, { yPercent: 0, opacity: 1 });
+      gsap.set(canvas, { opacity: 1 });
+      gsap.set(reveals, { opacity: 1, y: 0 });
+      phase = 1;
+      if (progressFill) progressFill.style.width = "100%";
+    }
+  }
+</script>

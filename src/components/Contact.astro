@@ -1,14 +1,35 @@
 ---
 ---
-<section id="contact" class="container" style="padding-bottom: 3rem;">
-  <span class="label">// Contatti</span>
-  <h2 style="margin-bottom: 1.5rem;">Parliamo<br/>di dati</h2>
-  <p style="max-width: 55ch; margin-bottom: 2rem;">
+<section id="contact" class="container contact">
+  <h2 data-reveal>Parliamo di dati.</h2>
+  <p class="contact-sub" data-reveal>
     Disponibile per posizioni Senior Data Analyst, BI Developer e profili Data Science / AI.
   </p>
-  <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-    <a href="mailto:matteo.aslam@email.com" class="btn">Email</a>
+  <div class="contact-links" data-reveal>
+    <a href="mailto:matteo.aslam@email.com" class="btn btn-accent">Email</a>
     <a href="https://linkedin.com/in/matteo-aslam" class="btn" target="_blank" rel="noopener">LinkedIn</a>
     <a href="https://github.com/slammista" class="btn" target="_blank" rel="noopener">GitHub</a>
   </div>
 </section>
+
+<style>
+  .contact {
+    text-align: center;
+    padding-top: 8rem;
+    padding-bottom: 6rem;
+  }
+  .contact h2 {
+    font-size: clamp(2.5rem, 8vw, 6rem);
+  }
+  .contact-sub {
+    margin: 1.5rem auto 2.5rem;
+    max-width: 50ch;
+    font-size: 1.1rem;
+  }
+  .contact-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+</style>

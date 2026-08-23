@@ -1,8 +1,36 @@
 ---
 ---
-<footer style="border-top: 1px solid var(--border); padding: 2rem 0;">
-  <div class="container" style="padding: 2rem 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-    <span style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;">© 2026 Matteo Aslam</span>
-    <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted);">Roma, Italia</span>
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <span class="site-footer-name">Matteo Aslam</span>
+    <span class="site-footer-place">Roma, Italia</span>
   </div>
 </footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--border);
+  }
+  .site-footer-inner {
+    width: 90%;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 2rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .site-footer-name {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .site-footer-place {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+</style>

@@ -4,7 +4,7 @@ import '../styles/global.css';
 export interface Props {
   title?: string;
 }
-const { title = "Matteo Aslam — Data & BI Professional" } = Astro.props;
+const { title = "Matteo Aslam, Data & BI Professional" } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang="it">
@@ -12,14 +12,44 @@ const { title = "Matteo Aslam — Data & BI Professional" } = Astro.props;
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
-  <meta name="description" content="Portfolio di Matteo Aslam — Data & Business Analyst specializzato in BI, ETL e analytics enterprise." />
+  <meta name="description" content="Portfolio di Matteo Aslam, Data & Business Analyst specializzato in BI, ETL e analytics enterprise." />
+  <meta name="theme-color" content="#0a0a0c" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
   <style>
     /* Inline critical CSS for first paint */
-    :root { --bg: #f5f5f0; --fg: #0a0a0a; }
+    :root { --bg: #0a0a0c; --fg: #f3f1ea; }
     body { background: var(--bg); color: var(--fg); margin: 0; font-family: system-ui, sans-serif; }
   </style>
 </head>
 <body>
   <slot />
+  <script>
+    import { gsap } from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const items = gsap.utils.toArray<HTMLElement>("[data-reveal]");
+
+    if (reduceMotion) {
+      gsap.set(items, { opacity: 1, y: 0 });
+    } else {
+      items.forEach((el) => {
+        gsap.set(el, { opacity: 0, y: 32 });
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top 88%",
+          once: true,
+          onEnter: () => gsap.to(el, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }),
+        });
+      });
+    }
+  </script>
 </body>
 </html>

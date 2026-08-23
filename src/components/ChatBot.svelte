@@ -35,10 +35,10 @@
 
 <div class="chat-widget">
   {#if open}
-    <div style="width: 360px; max-width: 90vw; background: var(--bg); border: 1px solid var(--fg); display: flex; flex-direction: column; max-height: 500px;">
-      <div style="padding: 1rem; border-bottom: 1px solid var(--fg); display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;">matteo.ai</span>
-        <button on:click={() => open = false} style="background: none; border: none; font-family: var(--font-mono); cursor: pointer; font-size: 1rem;">×</button>
+    <div style="width: 360px; max-width: 90vw; background: var(--bg-elevated); border: 1px solid var(--border-strong); display: flex; flex-direction: column; max-height: 500px;">
+      <div style="padding: 1rem; border-bottom: 1px solid var(--border-strong); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; color: var(--fg);">matteo.ai</span>
+        <button on:click={() => open = false} style="background: none; border: none; font-family: var(--font-mono); cursor: pointer; font-size: 1rem; color: var(--fg);">×</button>
       </div>
       <div style="flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
         {#each messages as msg}
@@ -46,7 +46,7 @@
             <div style="font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase; color: var(--muted); margin-bottom: 0.25rem;">
               {msg.role === 'user' ? 'Tu' : 'AI'}
             </div>
-            <div style="padding: 0.75rem; background: {msg.role === 'user' ? 'var(--fg)' : '#e8e8e0'}; color: {msg.role === 'user' ? 'var(--bg)' : 'var(--fg)'}; font-size: 0.875rem; line-height: 1.5;">
+            <div style="padding: 0.75rem; background: {msg.role === 'user' ? 'var(--accent)' : 'var(--bg)'}; color: {msg.role === 'user' ? 'var(--on-accent)' : 'var(--fg)'}; border: {msg.role === 'user' ? 'none' : '1px solid var(--border)'}; font-size: 0.875rem; line-height: 1.5;">
               {msg.text}
             </div>
           </div>
@@ -55,12 +55,12 @@
           <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted);">matteo.ai sta scrivendo...</div>
         {/if}
       </div>
-      <div style="padding: 1rem; border-top: 1px solid var(--fg); display: flex; gap: 0.5rem;">
+      <div style="padding: 1rem; border-top: 1px solid var(--border-strong); display: flex; gap: 0.5rem;">
         <input
           bind:value={input}
           on:keypress={handleKey}
           placeholder="Es: Quali tecnologie conosce?"
-          style="flex: 1; padding: 0.75rem; border: 1px solid var(--fg); background: transparent; font-family: var(--font-sans); font-size: 0.875rem; outline: none;"
+          style="flex: 1; padding: 0.75rem; border: 1px solid var(--border-strong); background: transparent; color: var(--fg); font-family: var(--font-sans); font-size: 0.875rem; outline: none;"
         />
         <button on:click={send} class="btn" style="padding: 0.75rem 1rem;">→</button>
       </div>
@@ -78,5 +78,9 @@
     bottom: 2rem;
     right: 2rem;
     z-index: 100;
+  }
+  .chat-widget input::placeholder {
+    color: var(--muted);
+    opacity: 1;
   }
 </style>

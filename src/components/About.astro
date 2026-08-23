@@ -1,23 +1,71 @@
 ---
 ---
-<section id="about" class="container">
-  <span class="label">// Chi sono</span>
-  <div class="grid-2" style="align-items: start;">
-    <div>
-      <h2 style="margin-bottom: 1.5rem;">Data & Business Analyst specializzato in Business Intelligence, ETL engineering e analisi dei dati per multinazionali.</h2>
-      <p style="margin-bottom: 1rem;">
+<section id="about" class="container about">
+  <div class="grid-2">
+    <div data-reveal>
+      <h2>Data & Business Analyst specializzato in Business Intelligence, ETL engineering e analisi dei dati per multinazionali.</h2>
+      <p style="margin-top: 1.5rem; margin-bottom: 1rem;">
         Ho lavorato direttamente con stakeholder di Toyota e Vodafone, traducendo requisiti di business in pipeline dati e dashboard strategiche.
       </p>
       <p>
-        Il mio punto di forza è la capacità di stare tra la complessità tecnica e le esigenze di business — capisco entrambe le lingue.
+        Il mio punto di forza è la capacità di stare tra la complessità tecnica e le esigenze di business. Capisco entrambe le lingue.
       </p>
+      <a href="/cv-matteo-aslam.pdf" class="btn" download style="margin-top: 2.5rem; display: inline-block;">Scarica CV</a>
     </div>
-    <pre class="code">{`const matteo = {
+
+    <div class="readout" data-reveal>
+      <div class="readout-bar">
+        <span class="readout-dot"></span>
+        <span>profile.json</span>
+      </div>
+      <pre class="readout-body">{`{
   role: "Data & BI Professional",
   location: "Rome, Italy",
   certified: "PL-300",
   available: true,
   goal: "Senior / Data Science"
-};`}</pre>
+}`}</pre>
+    </div>
   </div>
 </section>
+
+<style>
+  .about {
+    padding-top: 5rem;
+  }
+
+  .readout {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-left: 2px solid var(--accent);
+  }
+
+  .readout-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: lowercase;
+  }
+
+  .readout-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .readout-body {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--fg);
+    padding: 1.5rem;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+</style>
