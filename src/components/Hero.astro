@@ -194,18 +194,26 @@ const lastName = "Aslam";
 
       function seedNodes() {
         const cols = 7;
+        const rows = Math.ceil(NODE_COUNT / cols);
+        // The resolved lattice occupies a centered band rather than the whole
+        // viewport, so neighbours land inside the link radius and the network
+        // actually reads as connected.
+        const gridW = width * 0.66;
+        const gridH = height * 0.62;
+        const originX = (width - gridW) / 2;
+        const originY = (height - gridH) / 2;
+
         nodes = Array.from({ length: NODE_COUNT }, (_, i) => {
           const col = i % cols;
           const row = Math.floor(i / cols);
-          const rows = Math.ceil(NODE_COUNT / cols);
           return {
             sx: Math.random() * width,
             sy: Math.random() * height,
-            tx: (width / (cols + 1)) * (col + 1),
-            ty: (height / (rows + 1)) * (row + 1) + Math.sin(col * 0.9) * height * 0.1,
+            tx: originX + (gridW / (cols - 1)) * col,
+            ty: originY + (gridH / (rows - 1)) * row + Math.sin(col * 0.9) * height * 0.045,
             x: 0,
             y: 0,
-            r: 1.4 + Math.random() * 1.8,
+            r: 1.8 + Math.random() * 2,
             driftPhase: Math.random() * Math.PI * 2,
             driftSpeed: 0.35 + Math.random() * 0.5,
           };
@@ -233,9 +241,9 @@ const lastName = "Aslam";
             const dx = a.x - b.x;
             const dy = a.y - b.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            const maxDist = 85 + phase * 45;
+            const maxDist = 90 + phase * 90;
             if (dist < maxDist) {
-              const alpha = (1 - dist / maxDist) * (0.06 + phase * 0.16);
+              const alpha = (1 - dist / maxDist) * (0.06 + phase * 0.3);
               ctx.strokeStyle = `rgba(243, 241, 234, ${alpha})`;
               ctx.beginPath();
               ctx.moveTo(a.x, a.y);
@@ -247,7 +255,7 @@ const lastName = "Aslam";
 
         for (const n of nodes) {
           ctx.beginPath();
-          ctx.fillStyle = `rgba(255, 59, 48, ${0.32 + phase * 0.5})`;
+          ctx.fillStyle = `rgba(255, 59, 48, ${0.55 + phase * 0.35})`;
           ctx.arc(n.x, n.y, n.r + phase * 0.7, 0, Math.PI * 2);
           ctx.fill();
         }
@@ -306,36 +314,46 @@ const lastName = "Aslam";
         },
       });
 
-      // Hero copy clears out first, the title holds a beat longer
-      tl.to(intro, { opacity: 0, y: -24, duration: 0.6 }, 0);
+      // These use fromTo with immediateRender:false so the scrub timeline always
+      // starts from the fully-assembled hero. A plain .to() would sample whatever
+      // opacity the intro animation happened to be at when the timeline was built,
+      // which made the title vanish almost immediately.
+      tl.fromTo(
+        intro,
+        { opacity: 1, y: 0 },
+        { opacity: 0, y: -24, duration: 0.5, immediateRender: false },
+        0
+      );
 
       // The title breaks apart
-      tl.to(
+      tl.fromTo(
         chars,
+        { x: 0, y: 0, rotation: 0, opacity: 1 },
         {
           x: () => gsap.utils.random(-260, 260),
           y: () => gsap.utils.random(-180, 180),
           rotation: () => gsap.utils.random(-50, 50),
           opacity: 0,
           stagger: { each: 0.012, from: "random" },
-          duration: 1.4,
+          duration: 1.15,
+          immediateRender: false,
         },
-        0.2
+        0.15
       );
 
-      // The data network emerges from the debris
-      tl.to(canvas, { opacity: 1, duration: 1.2 }, 1);
+      // The network emerges while the title is still breaking, so the debris
+      // reads as turning into data instead of leaving the screen empty.
+      tl.to(canvas, { opacity: 1, duration: 0.8 }, 0.3);
 
       // and resolves from noise into structured signal
-      tl.to(phaseDriver, { t: 1, duration: 1.6, onUpdate: () => (phase = phaseDriver.t) }, 1.4);
+      tl.to(phaseDriver, { t: 1, duration: 1.5, onUpdate: () => (phase = phaseDriver.t) }, 0.9);
 
-      // The thesis line lands, then hands off to the site
-      tl.to(thesis, { opacity: 1, duration: 0.8 }, 2.5);
-      tl.to(canvas, { opacity: 0.35, duration: 0.6 }, 3.1);
+      // The thesis line lands over the resolved network, then hands off to the site
+      tl.to(thesis, { opacity: 1, duration: 0.7 }, 2.1);
     } else {
       gsap.set(chars, { yPercent: 0, opacity: 1 });
       gsap.set(intro, { opacity: 1, y: 0 });
-      gsap.set(canvas, { opacity: 0.35 });
+      gsap.set(canvas, { opacity: 1 });
       gsap.set(thesis, { opacity: 0 });
       phase = 1;
       if (progressFill) progressFill.style.width = "100%";
