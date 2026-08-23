@@ -18,12 +18,18 @@ const lastName = "Aslam";
         </span>
       </h1>
 
-      <p class="cinema-sub" data-cinema-reveal>
+      <p class="cinema-sub cinema-intro">
         Data & Business Analyst. Trasformo dati complessi in decisioni per aziende enterprise.
       </p>
 
-      <a href="#about" class="cinema-cta" data-cinema-reveal>Guarda il percorso</a>
+      <div class="cinema-actions cinema-intro">
+        <a href="#projects" class="btn btn-accent">Vedi i progetti</a>
+        <a href="/cv-matteo-aslam.pdf" class="btn" download>Scarica CV</a>
+      </div>
     </div>
+
+    <!-- The bridge line: appears once the data network has resolved, hands off to the site -->
+    <p class="cinema-thesis" aria-hidden="true">Dal dato grezzo alla decisione.</p>
 
     <div class="cinema-progress" aria-hidden="true"><span class="cinema-progress-fill"></span></div>
   </div>
@@ -100,21 +106,27 @@ const lastName = "Aslam";
     color: var(--fg);
   }
 
-  .cinema-cta {
+  .cinema-actions {
     margin-top: 2.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 1rem 2rem;
-    border: 1px solid var(--border-strong);
-    color: var(--fg);
-    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
   }
-  .cinema-cta:hover {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
+
+  .cinema-thesis {
+    position: absolute;
+    z-index: 2;
+    width: 90%;
+    max-width: 22ch;
+    margin: 0 auto;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    font-size: clamp(1.75rem, 5vw, 3.5rem);
+    opacity: 0;
   }
 
   .cinema-progress {
@@ -149,8 +161,9 @@ const lastName = "Aslam";
   const pin = document.querySelector<HTMLElement>(".cinema-pin");
   const canvas = document.querySelector<HTMLCanvasElement>(".cinema-canvas");
   const progressFill = document.querySelector<HTMLElement>(".cinema-progress-fill");
+  const thesis = document.querySelector<HTMLElement>(".cinema-thesis");
   const chars = gsap.utils.toArray<HTMLElement>(".cinema-char");
-  const reveals = gsap.utils.toArray<HTMLElement>(".cinema-content [data-cinema-reveal]");
+  const intro = gsap.utils.toArray<HTMLElement>(".cinema-intro");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---- Generative canvas: a data-network that resolves from noise into signal ---- */
@@ -257,12 +270,25 @@ const lastName = "Aslam";
       }
     }
 
-    /* ---- Scroll-scrubbed cinematic timeline ---- */
     if (!reduceMotion) {
-      gsap.set(chars, { yPercent: 120, opacity: 0 });
-      gsap.set(canvas, { opacity: 0 });
-      gsap.set(reveals, { opacity: 0, y: 28 });
+      /* ---- Intro: the name is on screen the moment the page loads ---- */
+      gsap.from(chars, {
+        yPercent: 110,
+        opacity: 0,
+        stagger: 0.03,
+        duration: 0.9,
+        ease: "power3.out",
+      });
+      gsap.from(intro, {
+        opacity: 0,
+        y: 22,
+        stagger: 0.1,
+        duration: 0.8,
+        delay: 0.45,
+        ease: "power3.out",
+      });
 
+      /* ---- Scroll-scrubbed cinematic timeline (starts from the assembled title) ---- */
       const phaseDriver = { t: 0 };
 
       const tl = gsap.timeline({
@@ -270,7 +296,7 @@ const lastName = "Aslam";
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: () => "+=" + Math.max(window.innerHeight * 4, 2600),
+          end: () => "+=" + Math.max(window.innerHeight * 1.7, 1300),
           scrub: 0.6,
           pin: pin,
           anticipatePin: 1,
@@ -280,10 +306,10 @@ const lastName = "Aslam";
         },
       });
 
-      // 0% -> 20%: title assembles
-      tl.to(chars, { yPercent: 0, opacity: 1, stagger: 0.02, duration: 2 }, 0);
+      // Hero copy clears out first, the title holds a beat longer
+      tl.to(intro, { opacity: 0, y: -24, duration: 0.6 }, 0);
 
-      // 20% -> 40%: title breaks apart
+      // The title breaks apart
       tl.to(
         chars,
         {
@@ -292,23 +318,25 @@ const lastName = "Aslam";
           rotation: () => gsap.utils.random(-50, 50),
           opacity: 0,
           stagger: { each: 0.012, from: "random" },
-          duration: 2,
+          duration: 1.4,
         },
-        2
+        0.2
       );
 
-      // 40% -> 60%: the data visual emerges
-      tl.to(canvas, { opacity: 1, duration: 2 }, 4);
+      // The data network emerges from the debris
+      tl.to(canvas, { opacity: 1, duration: 1.2 }, 1);
 
-      // 60% -> 80%: the visual resolves from noise into signal
-      tl.to(phaseDriver, { t: 1, duration: 2, onUpdate: () => (phase = phaseDriver.t) }, 6);
+      // and resolves from noise into structured signal
+      tl.to(phaseDriver, { t: 1, duration: 1.6, onUpdate: () => (phase = phaseDriver.t) }, 1.4);
 
-      // 80% -> 100%: supporting text reveals, new scene follows
-      tl.to(reveals, { opacity: 1, y: 0, stagger: 0.12, duration: 2 }, 8);
+      // The thesis line lands, then hands off to the site
+      tl.to(thesis, { opacity: 1, duration: 0.8 }, 2.5);
+      tl.to(canvas, { opacity: 0.35, duration: 0.6 }, 3.1);
     } else {
       gsap.set(chars, { yPercent: 0, opacity: 1 });
-      gsap.set(canvas, { opacity: 1 });
-      gsap.set(reveals, { opacity: 1, y: 0 });
+      gsap.set(intro, { opacity: 1, y: 0 });
+      gsap.set(canvas, { opacity: 0.35 });
+      gsap.set(thesis, { opacity: 0 });
       phase = 1;
       if (progressFill) progressFill.style.width = "100%";
     }

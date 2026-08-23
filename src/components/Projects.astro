@@ -1,0 +1,252 @@
+---
+const projects = [
+  {
+    name: "Data Assistant",
+    kind: "AI / LLM / CSV Analysis",
+    blurb:
+      "Assistente AI conversazionale per l'analisi di dati. Carica un CSV e fai domande in linguaggio naturale. Powered by Llama 3.3 70B via Groq.",
+    stats: [
+      { value: "Llama 3.3", label: "Modello" },
+      { value: "Groq", label: "Provider" },
+      { value: "CSV upload", label: "Input" },
+    ],
+    tags: ["AI", "LLM", "Python", "React"],
+    href: "https://data-assistant.vercel.app/",
+    featured: true,
+  },
+  {
+    name: "Italian House Price Prediction",
+    kind: "ML / Regressione / Real Estate",
+    blurb:
+      "Modello ML di regressione per la previsione dei prezzi immobiliari italiani. Gradient Boosting su 5.000 proprietà simulate in 11 città.",
+    stats: [
+      { value: "0.9524", label: "R2 Score" },
+      { value: "29K EUR", label: "MAE" },
+      { value: "5.000", label: "Proprietà" },
+    ],
+    tags: ["Python", "Scikit-learn", "ML", "Regression"],
+    href: "https://house-price-dashboard.vercel.app/",
+    featured: false,
+  },
+  {
+    name: "E-Commerce Analytics",
+    kind: "ETL / BI / SQL",
+    blurb:
+      "Dashboard analitica e-commerce con pipeline ETL completa, da API a validazione, trasformazione e SQLite.",
+    stats: [
+      { value: "7.8M EUR", label: "Revenue" },
+      { value: "7.820", label: "Ordini" },
+      { value: "99.2%", label: "Repeat rate" },
+    ],
+    tags: ["ETL", "SQLite", "Python", "BI"],
+    href: "https://ecommerce-dashboard-eosin-seven.vercel.app/",
+    featured: false,
+  },
+  {
+    name: "Telecom Churn Prediction",
+    kind: "ML / Classificazione / Telco",
+    blurb:
+      "Modello ML per la previsione del churn clienti nel settore telecomunicazioni. Confronto tra 3 modelli su 7.043 clienti simulati.",
+    stats: [
+      { value: "0.734", label: "AUC-ROC" },
+      { value: "30.9%", label: "Churn rate" },
+      { value: "7.043", label: "Clienti" },
+    ],
+    tags: ["Python", "Scikit-learn", "ML", "Classification"],
+    href: "https://churn-dashboard-sand.vercel.app/",
+    featured: false,
+  },
+  {
+    name: "Automotive Sales Dashboard",
+    kind: "BI / KPI / Sales Analytics",
+    blurb:
+      "Case study BI completo per un team sales automotive. Dal dato grezzo ai KPI decisionali, con time-series e analisi margini.",
+    stats: [
+      { value: "144.1M EUR", label: "Revenue" },
+      { value: "5.000", label: "Unità" },
+      { value: "8.2/10", label: "NPS medio" },
+    ],
+    tags: ["Power BI", "Python", "KPI", "BI"],
+    href: "https://automotive-sales-dashboard.vercel.app/",
+    featured: false,
+  },
+];
+---
+<section id="projects" class="container projects">
+  <h2 data-reveal>Progetti</h2>
+  <p class="projects-lede" data-reveal>
+    Dashboard interattive, modelli ML e strumenti AI costruiti come case study concreti.
+  </p>
+
+  <div class="bento">
+    {projects.map((project) => (
+      <a
+        class:list={["card", project.featured && "card--featured"]}
+        href={project.href}
+        target="_blank"
+        rel="noopener"
+        data-reveal
+      >
+        <div class="card-head">
+          <div>
+            <h3 class="card-name">{project.name}</h3>
+            <p class="card-kind">{project.kind}</p>
+          </div>
+          <span class="card-open" aria-hidden="true">Apri</span>
+        </div>
+
+        <p class="card-blurb">{project.blurb}</p>
+
+        <dl class="card-stats">
+          {project.stats.map((stat) => (
+            <div class="card-stat">
+              <dt class="card-stat-label">{stat.label}</dt>
+              <dd class="card-stat-value">{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <ul class="card-tags">
+          {project.tags.map((tag) => <li>{tag}</li>)}
+        </ul>
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  .projects-lede {
+    margin-top: -0.5rem;
+    margin-bottom: 3.5rem;
+    font-size: 1.05rem;
+    color: var(--muted);
+  }
+
+  .bento {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-flow: dense;
+    gap: 1.25rem;
+  }
+  @media (min-width: 860px) {
+    .bento { grid-template-columns: repeat(2, 1fr); }
+    /* 5 projects: featured spans both columns, the remaining 4 fill 2 rows exactly */
+    .card--featured { grid-column: span 2; }
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding: 1.75rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
+    color: var(--fg);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s, background 0.35s;
+  }
+  .card:hover,
+  .card:focus-visible {
+    transform: translateY(-4px);
+    /* keep the card's own text color: the global a:hover rule would tint it accent */
+    color: var(--fg);
+    border-color: var(--border-strong);
+    border-bottom-color: var(--accent);
+    background: #1c1c21;
+  }
+
+  .card--featured {
+    padding: 2.25rem;
+    border-bottom-color: var(--accent);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .card-name {
+    font-size: 1.25rem;
+    margin-bottom: 0.35rem;
+  }
+  .card--featured .card-name {
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+  }
+
+  .card-kind {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .card-open {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    white-space: nowrap;
+    padding-top: 0.3rem;
+    transition: color 0.25s, transform 0.25s;
+  }
+  .card:hover .card-open {
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+
+  .card-blurb {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .card-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+
+  .card-stat-value {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+    color: var(--fg);
+    line-height: 1.2;
+  }
+
+  .card-tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: auto;
+  }
+  .card-tags li {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    .card-open { transition: none; }
+    .card:hover { transform: none; }
+  }
+</style>
