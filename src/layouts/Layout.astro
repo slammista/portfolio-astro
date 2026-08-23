@@ -1,0 +1,24 @@
+---
+export interface Props {
+  title?: string;
+}
+const { title = "Matteo Aslam — Data & BI Professional" } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content="Portfolio di Matteo Aslam — Data & Business Analyst specializzato in BI, ETL e analytics enterprise." />
+  <link rel="stylesheet" href="/src/styles/global.css" />
+  <style>
+    /* Inline critical CSS for first paint */
+    :root { --bg: #f5f5f0; --fg: #0a0a0a; }
+    body { background: var(--bg); color: var(--fg); margin: 0; font-family: system-ui, sans-serif; }
+  </style>
+</head>
+<body>
+  <slot />
+</body>
+</html>
