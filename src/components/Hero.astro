@@ -299,6 +299,16 @@ const lastName = "Aslam";
       /* ---- Scroll-scrubbed cinematic timeline (starts from the assembled title) ---- */
       const phaseDriver = { t: 0 };
 
+      // Scrubbing back to the very top could leave some characters stuck at a
+      // partial opacity, so the name came back incomplete when returning from
+      // further down the page. Force the assembled state whenever the playhead
+      // leaves the pinned section backwards.
+      const restoreHero = () => {
+        gsap.set(chars, { x: 0, y: 0, rotation: 0, opacity: 1 });
+        gsap.set(intro, { opacity: 1, y: 0 });
+        gsap.set(thesis, { opacity: 0 });
+      };
+
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
@@ -308,8 +318,10 @@ const lastName = "Aslam";
           scrub: 0.6,
           pin: pin,
           anticipatePin: 1,
+          onLeaveBack: restoreHero,
           onUpdate: (self) => {
             if (progressFill) progressFill.style.width = `${self.progress * 100}%`;
+            if (self.progress <= 0.001) restoreHero();
           },
         },
       });
@@ -334,7 +346,9 @@ const lastName = "Aslam";
           y: () => gsap.utils.random(-180, 180),
           rotation: () => gsap.utils.random(-50, 50),
           opacity: 0,
-          stagger: { each: 0.012, from: "random" },
+          // Deterministic order: a random stagger order gets reshuffled on every
+          // ScrollTrigger refresh, which left characters rendering out of sync.
+          stagger: { each: 0.012, from: "center" },
           duration: 1.15,
           immediateRender: false,
         },

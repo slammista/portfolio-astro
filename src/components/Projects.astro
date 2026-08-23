@@ -1,20 +1,6 @@
 ---
 const projects = [
   {
-    name: "Data Assistant",
-    kind: "AI / LLM / CSV Analysis",
-    blurb:
-      "Assistente AI conversazionale per l'analisi di dati. Carica un CSV e fai domande in linguaggio naturale. Powered by Llama 3.3 70B via Groq.",
-    stats: [
-      { value: "Llama 3.3", label: "Modello" },
-      { value: "Groq", label: "Provider" },
-      { value: "CSV upload", label: "Input" },
-    ],
-    tags: ["AI", "LLM", "Python", "React"],
-    href: "https://data-assistant.vercel.app/",
-    featured: true,
-  },
-  {
     name: "Italian House Price Prediction",
     kind: "ML / Regressione / Real Estate",
     blurb:
@@ -26,7 +12,6 @@ const projects = [
     ],
     tags: ["Python", "Scikit-learn", "ML", "Regression"],
     href: "https://house-price-dashboard.vercel.app/",
-    featured: false,
   },
   {
     name: "E-Commerce Analytics",
@@ -40,7 +25,6 @@ const projects = [
     ],
     tags: ["ETL", "SQLite", "Python", "BI"],
     href: "https://ecommerce-dashboard-eosin-seven.vercel.app/",
-    featured: false,
   },
   {
     name: "Telecom Churn Prediction",
@@ -54,7 +38,6 @@ const projects = [
     ],
     tags: ["Python", "Scikit-learn", "ML", "Classification"],
     href: "https://churn-dashboard-sand.vercel.app/",
-    featured: false,
   },
   {
     name: "Automotive Sales Dashboard",
@@ -68,20 +51,19 @@ const projects = [
     ],
     tags: ["Power BI", "Python", "KPI", "BI"],
     href: "https://automotive-sales-dashboard.vercel.app/",
-    featured: false,
   },
 ];
 ---
 <section id="projects" class="container projects">
   <h2 data-reveal>Progetti</h2>
   <p class="projects-lede" data-reveal>
-    Dashboard interattive, modelli ML e strumenti AI costruiti come case study concreti.
+    Dashboard interattive e modelli di machine learning costruiti come case study concreti.
   </p>
 
   <div class="bento">
     {projects.map((project) => (
       <a
-        class:list={["card", project.featured && "card--featured"]}
+        class="card"
         href={project.href}
         target="_blank"
         rel="noopener"
@@ -111,6 +93,18 @@ const projects = [
         </ul>
       </a>
     ))}
+
+    <div class="card card--soon" data-reveal>
+      <div class="soon-pulse" aria-hidden="true"></div>
+      <h3 class="card-name">Altri progetti in arrivo</h3>
+      <p class="card-blurb">
+        Sto lavorando a nuovi case study su analytics e AI applicata. Questa sezione si aggiorna
+        man mano che escono.
+      </p>
+      <a class="soon-link" href="https://github.com/slammista" target="_blank" rel="noopener">
+        Seguimi su GitHub
+      </a>
+    </div>
   </div>
 </section>
 
@@ -130,8 +124,9 @@ const projects = [
   }
   @media (min-width: 860px) {
     .bento { grid-template-columns: repeat(2, 1fr); }
-    /* 5 projects: featured spans both columns, the remaining 4 fill 2 rows exactly */
-    .card--featured { grid-column: span 2; }
+    /* 4 projects fill two full rows, the coming-soon panel closes the grid
+       across both columns: 6 slots, no empty cells. */
+    .card--soon { grid-column: span 2; }
   }
 
   .card {
@@ -155,9 +150,51 @@ const projects = [
     background: #1c1c21;
   }
 
-  .card--featured {
+  /* Not a project: a placeholder panel, so it reads as open space rather than
+     another card with missing content. */
+  .card--soon {
+    gap: 0.85rem;
+    align-items: flex-start;
+    background: transparent;
+    border: 1px dashed var(--border-strong);
+    border-bottom: 1px dashed var(--border-strong);
     padding: 2.25rem;
+  }
+  .card--soon:hover {
+    transform: none;
+    background: transparent;
+    border-color: var(--border-strong);
+    border-bottom-color: var(--border-strong);
+  }
+
+  .soon-pulse {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: var(--accent);
+    animation: soon-pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes soon-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.75); }
+  }
+
+  .soon-link {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    border-bottom-color: var(--border-strong);
+  }
+  .soon-link:hover {
+    color: var(--accent);
     border-bottom-color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .soon-pulse { animation: none; }
   }
 
   .card-head {
@@ -170,9 +207,6 @@ const projects = [
   .card-name {
     font-size: 1.25rem;
     margin-bottom: 0.35rem;
-  }
-  .card--featured .card-name {
-    font-size: clamp(1.5rem, 3vw, 2.1rem);
   }
 
   .card-kind {

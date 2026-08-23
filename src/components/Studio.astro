@@ -1,0 +1,313 @@
+---
+const stats = [
+  { value: "53", label: "Agenti specializzati" },
+  { value: "8", label: "Dipartimenti" },
+  { value: "20", label: "Domini Knowledge Base" },
+  { value: "41 / 12", label: "Sonnet / Haiku" },
+];
+
+const pipeline = [
+  { step: "Creazione", detail: "L'agente di dominio produce il contenuto" },
+  { step: "Cross-Domain Check", detail: "Verifica di coerenza con il resto del mondo" },
+  { step: "Validazione QA", detail: "Controllo qualità e sicurezza" },
+  { step: "Approvazione", detail: "Il Director approva in batch, poi si archivia" },
+];
+
+const departments = [
+  { code: "dir", name: "Direzione", count: 7 },
+  { code: "viz", name: "Visual & Audio", count: 11 },
+  { code: "biz", name: "Business", count: 8 },
+  { code: "design", name: "Game Design", count: 7 },
+  { code: "narr", name: "Narrativa", count: 7 },
+  { code: "prog", name: "Programmazione", count: 6 },
+  { code: "qa", name: "Quality", count: 6 },
+  { code: "kb", name: "Infrastruttura", count: 1 },
+];
+---
+<section id="studio" class="studio">
+  <div class="studio-inner">
+    <header class="studio-head">
+      <p class="studio-tag" data-reveal>Progetto in evidenza / Open source</p>
+      <h2 data-reveal>Agentic Game Studio</h2>
+      <p class="studio-claim" data-reveal>
+        Uno studio di sviluppo videoludico AAA ricostruito come sistema multi-agente dentro Claude Code.
+        Non una chat a cui chiedere idee: una pipeline di pre-produzione che crea, valida e archivia.
+      </p>
+
+      <div class="studio-problem" data-reveal>
+        <p>
+          La pre-produzione è il collo di bottiglia dei team piccoli: mesi di brainstorming disperso,
+          lore che si contraddice, Game Design Document mai finiti. Qui ogni ruolo, dal Game Director
+          al Dialogue Writer, è un agente autonomo con autorità definita e accesso limitato alla
+          Knowledge Base condivisa.
+        </p>
+      </div>
+
+      <a class="btn btn-accent studio-cta" href="https://github.com/slammista/agentic-game-studio" target="_blank" rel="noopener">
+        Vedi su GitHub
+      </a>
+    </header>
+
+    <dl class="studio-stats">
+      {stats.map((s) => (
+        <div class="studio-stat" data-reveal>
+          <dd class="studio-stat-value">{s.value}</dd>
+          <dt class="studio-stat-label">{s.label}</dt>
+        </div>
+      ))}
+    </dl>
+
+    <div class="studio-block">
+      <h3 class="studio-sub" data-reveal>La pipeline</h3>
+      <ol class="pipeline">
+        {pipeline.map((p, i) => (
+          <li class="pipeline-step">
+            <span class="pipeline-index" aria-hidden="true">{i + 1}</span>
+            <span class="pipeline-name">{p.step}</span>
+            <span class="pipeline-detail">{p.detail}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <div class="studio-block">
+      <h3 class="studio-sub" data-reveal>I dipartimenti</h3>
+      <ul class="depts">
+        {departments.map((d) => (
+          <li class="dept" data-reveal>
+            <span class="dept-code">{d.code}-</span>
+            <span class="dept-name">{d.name}</span>
+            <span class="dept-count">{d.count}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <p class="studio-note" data-reveal>
+      I task ripetitivi e il QA girano su Haiku, la direzione creativa su Sonnet. Nessun agente carica
+      l'intera memoria del progetto: ognuno legge solo il proprio dominio.
+    </p>
+  </div>
+</section>
+
+<style>
+  .studio {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--bg-elevated), var(--bg) 70%);
+  }
+
+  .studio-inner {
+    width: 90%;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 7rem 0;
+  }
+
+  .studio-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .studio-head h2 {
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+    margin-bottom: 1.5rem;
+  }
+
+  .studio-claim {
+    font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+    max-width: 58ch;
+  }
+
+  .studio-problem {
+    margin-top: 2rem;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--accent);
+  }
+  .studio-problem p {
+    color: var(--muted);
+    max-width: 62ch;
+  }
+
+  .studio-cta {
+    margin-top: 2.5rem;
+  }
+
+  .studio-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    margin-top: 4.5rem;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  @media (min-width: 760px) {
+    .studio-stats { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .studio-stat {
+    background: var(--bg);
+    padding: 1.75rem 1.5rem;
+  }
+
+  .studio-stat-value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .studio-stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+  }
+
+  .studio-block {
+    margin-top: 4.5rem;
+  }
+
+  .studio-sub {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 1.75rem;
+  }
+
+  /* Pipeline: four stages that light up in order as the section scrolls past */
+  .pipeline {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  @media (min-width: 860px) {
+    .pipeline { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .pipeline-step {
+    background: var(--bg);
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    position: relative;
+    transition: background 0.5s ease;
+  }
+  .pipeline-step.is-live {
+    background: var(--bg-elevated);
+  }
+  .pipeline-step::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .pipeline-step.is-live::after {
+    width: 100%;
+  }
+
+  .pipeline-index {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+  }
+
+  .pipeline-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  .pipeline-detail {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .depts {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  @media (min-width: 700px) {
+    .depts { grid-template-columns: repeat(2, 1fr); column-gap: 3rem; }
+  }
+
+  .dept {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dept-code {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    min-width: 4.5rem;
+  }
+
+  .dept-name {
+    flex: 1;
+  }
+
+  .dept-count {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .studio-note {
+    margin-top: 3rem;
+    color: var(--muted);
+    max-width: 62ch;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pipeline-step,
+    .pipeline-step::after { transition: none; }
+  }
+</style>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const steps = gsap.utils.toArray<HTMLElement>(".pipeline-step");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (reduceMotion) {
+    steps.forEach((s) => s.classList.add("is-live"));
+  } else {
+    // Stages light up in sequence so the order of the pipeline is what the
+    // animation communicates, rather than decoration.
+    steps.forEach((step, i) => {
+      ScrollTrigger.create({
+        trigger: step,
+        start: "top 82%",
+        once: true,
+        onEnter: () => window.setTimeout(() => step.classList.add("is-live"), i * 160),
+      });
+    });
+  }
+</script>
