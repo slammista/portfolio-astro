@@ -96,13 +96,13 @@ const projects = [
 
     <div class="card card--soon" data-reveal>
       <div class="soon-pulse" aria-hidden="true"></div>
-      <h3 class="card-name">Altri progetti in arrivo</h3>
+      <h3 class="soon-title">Coming soon</h3>
       <p class="card-blurb">
-        Sto lavorando a nuovi case study su analytics e AI applicata. Questa sezione si aggiorna
-        man mano che escono.
+        Sono sempre al lavoro con nuovi progetti per fare nuove esperienze, seguimi su LinkedIn per
+        rimanere aggiornato.
       </p>
-      <a class="soon-link" href="https://github.com/slammista" target="_blank" rel="noopener">
-        Seguimi su GitHub
+      <a class="soon-link" href="https://www.linkedin.com/in/matteo-aslam-1a71871b9" target="_blank" rel="noopener">
+        Seguimi su LinkedIn
       </a>
     </div>
   </div>
@@ -173,6 +173,16 @@ const projects = [
     border-radius: 999px;
     background: var(--accent);
     animation: soon-pulse 2.4s ease-in-out infinite;
+  }
+
+  .soon-title {
+    font-family: var(--font-mono);
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    line-height: 1.1;
+    margin-bottom: 0.25rem;
   }
 
   @keyframes soon-pulse {

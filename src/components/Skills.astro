@@ -1,6 +1,7 @@
 ---
-const rowA = ["Power BI", "DAX", "Power Query", "Tableau", "Excel Avanzato", "SQL Server", "Oracle PL/SQL", "Talend", "DataStage", "Databricks"];
-const rowB = ["Python", "Pandas", "NumPy", "Scikit-learn", "SQL", "R", "Google Cloud Platform", "Azure", "ElasticSearch", "Git / GitHub"];
+const rowA = ["Power BI", "DAX", "Power Query (M)", "Data modeling", "Excel avanzato", "Tableau", "SQL Server", "SQL", "Oracle PL/SQL", "Talend", "Databricks", "DataStage"];
+const rowB = ["Claude Code", "Codex", "Antigravity", "Node.js", "Next.js", "React", "Astro", "Three.js", "Supabase", "MySQL"];
+const rowC = ["Python", "Pandas", "JavaScript", "R", "Data automation", "Azure", "Google Cloud Platform", "Git / GitHub", "Jira", "ServiceNow"];
 ---
 <section id="skills" class="container skills">
   <h2 data-reveal>Stack tecnico</h2>
@@ -14,6 +15,12 @@ const rowB = ["Python", "Pandas", "NumPy", "Scikit-learn", "SQL", "R", "Google C
   <div class="marquee" data-reveal>
     <div class="marquee-track marquee-track--right">
       {[...rowB, ...rowB].map((skill) => <span class="marquee-tag">{skill}</span>)}
+    </div>
+  </div>
+
+  <div class="marquee" data-reveal>
+    <div class="marquee-track marquee-track--left marquee-track--slow">
+      {[...rowC, ...rowC].map((skill) => <span class="marquee-tag">{skill}</span>)}
     </div>
   </div>
 </section>
@@ -42,6 +49,10 @@ const rowB = ["Python", "Pandas", "NumPy", "Scikit-learn", "SQL", "R", "Google C
   }
   .marquee-track--right {
     animation-name: marquee-right;
+  }
+  /* Slightly different speed so the three rows never lock into step */
+  .marquee-track--slow {
+    animation-duration: 46s;
   }
 
   .marquee-tag {

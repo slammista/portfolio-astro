@@ -9,7 +9,8 @@ import Projects from "../components/Projects.astro";
 import Skills from "../components/Skills.astro";
 import Contact from "../components/Contact.astro";
 import Footer from "../components/Footer.astro";
-import ChatBot from "../components/ChatBot.svelte";
+// ChatBot.svelte and src/pages/api/chat.ts are kept in the repo but not mounted:
+// the free model backing the assistant is unavailable for now.
 ---
 
 <Layout>
@@ -23,5 +24,4 @@ import ChatBot from "../components/ChatBot.svelte";
   <Skills />
   <Contact />
   <Footer />
-  <ChatBot client:load />
 </Layout>
