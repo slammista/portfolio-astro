@@ -80,11 +80,15 @@ a:hover {
 
 .grid-2 {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, 1fr), not the implicit minmax(auto, 1fr): a wide-content child
+     (the profile.json <pre>, in practice) otherwise sets the track's min size
+     and pushes the whole grid past the viewport instead of scrolling inside
+     its own box. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 3rem;
 }
 @media (min-width: 768px) {
-  .grid-2 { grid-template-columns: 1.1fr 0.9fr; gap: 4rem; }
+  .grid-2 { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 4rem; }
 }
 
 .eyebrow {

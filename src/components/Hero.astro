@@ -201,10 +201,8 @@ const lastName = "Aslam";
 
       const NODE_COUNT = 42;
 
-      function resize() {
+      function paintBuffer() {
         dpr = Math.min(window.devicePixelRatio || 1, 2);
-        width = pin!.clientWidth;
-        height = pin!.clientHeight;
         canvas!.width = width * dpr;
         canvas!.height = height * dpr;
         ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -236,6 +234,38 @@ const lastName = "Aslam";
             driftSpeed: 0.35 + Math.random() * 0.5,
           };
         });
+      }
+
+      // Mobile browsers change the visible viewport height mid-session as the
+      // address bar collapses on scroll (100dvh resolving to a different value
+      // than at load). A single measurement taken at script start can end up
+      // stale, which drew the whole network squeezed into a corner. Re-measure
+      // on any actual box-size change (ResizeObserver, not just 'resize' - it
+      // also catches the dvh-driven case) and rescale the existing pattern
+      // instead of re-randomizing it, so a correction never looks like a jump.
+      function handleResize() {
+        const newWidth = pin!.clientWidth;
+        const newHeight = pin!.clientHeight;
+        if (newWidth === width && newHeight === height) return;
+
+        if (nodes.length && width > 0 && height > 0) {
+          const sx = newWidth / width;
+          const sy = newHeight / height;
+          for (const n of nodes) {
+            n.sx *= sx;
+            n.sy *= sy;
+            n.tx *= sx;
+            n.ty *= sy;
+          }
+          width = newWidth;
+          height = newHeight;
+          paintBuffer();
+        } else {
+          width = newWidth;
+          height = newHeight;
+          paintBuffer();
+          seedNodes();
+        }
       }
 
       function draw(time: number) {
@@ -281,12 +311,21 @@ const lastName = "Aslam";
         requestAnimationFrame(draw);
       }
 
-      resize();
+      width = pin!.clientWidth;
+      height = pin!.clientHeight;
+      paintBuffer();
       seedNodes();
-      window.addEventListener("resize", () => {
-        resize();
-        seedNodes();
-      });
+
+      if (typeof ResizeObserver !== "undefined") {
+        let raf = 0;
+        const ro = new ResizeObserver(() => {
+          cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(handleResize);
+        });
+        ro.observe(pin!);
+      } else {
+        window.addEventListener("resize", handleResize);
+      }
 
       if (!reduceMotion) {
         requestAnimationFrame(draw);
