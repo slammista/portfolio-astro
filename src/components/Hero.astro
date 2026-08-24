@@ -366,13 +366,18 @@ const lastName = "Aslam";
         gsap.set(thesis, { opacity: 0 });
       };
 
+      // A longer pin distance and heavier scrub lag give the sequence room to
+      // read as distinct beats even on a fast mobile flick, instead of the
+      // whole break-apart-and-resolve happening within two or three frames.
+      const PIN_DISTANCE = () => Math.max(window.innerHeight * 2.6, 2000);
+
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: () => "+=" + Math.max(window.innerHeight * 1.7, 1300),
-          scrub: 0.6,
+          end: () => "+=" + PIN_DISTANCE(),
+          scrub: 1.1,
           pin: pin,
           anticipatePin: 1,
           onLeaveBack: restoreHero,
@@ -382,17 +387,6 @@ const lastName = "Aslam";
           },
         },
       });
-
-      // These use fromTo with immediateRender:false so the scrub timeline always
-      // starts from the fully-assembled hero. A plain .to() would sample whatever
-      // opacity the intro animation happened to be at when the timeline was built,
-      // which made the title vanish almost immediately.
-      tl.fromTo(
-        intro,
-        { opacity: 1, y: 0 },
-        { opacity: 0, y: -24, duration: 0.5, immediateRender: false },
-        0
-      );
 
       // The title breaks apart
       tl.fromTo(
@@ -419,8 +413,35 @@ const lastName = "Aslam";
       // and resolves from noise into structured signal
       tl.to(phaseDriver, { t: 1, duration: 1.5, onUpdate: () => (phase = phaseDriver.t) }, 0.9);
 
-      // The thesis line lands over the resolved network, then hands off to the site
-      tl.to(thesis, { opacity: 1, duration: 0.7 }, 2.1);
+      // The thesis line lands once the network has fully settled, holds, then
+      // exits before the pin releases: "Chi sono" now arrives over a scene
+      // that is already clearing, instead of appearing beneath one still at
+      // full opacity.
+      tl.to(thesis, { opacity: 1, duration: 0.7 }, 2.4);
+      tl.to(canvas, { opacity: 0.12, duration: 0.6 }, 3.5);
+      tl.to(thesis, { opacity: 0, duration: 0.5 }, 3.6);
+
+      // The intro copy and CTAs are handled outside the scrub: a scrub-driven
+      // fade covers only ~12% of a ~2000px+ pin, so a normal flick jumped
+      // straight past it and the buttons looked like they popped rather than
+      // faded. A separate, non-scrubbed trigger with its own eased tween
+      // crosses a fixed scroll threshold once per direction, so the fade
+      // always plays at the same speed regardless of how fast the user
+      // scrolls.
+      const showIntro = () => gsap.to(intro, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" });
+
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: () => "+=" + Math.max(window.innerHeight * 0.32, 220),
+        onEnter: () => gsap.to(intro, { opacity: 0, y: -24, duration: 0.45, ease: "power2.out" }),
+        // onLeaveBack fires scrolling up past the START of this range; onEnterBack
+        // fires scrolling up back INTO it from below (the common case: the user
+        // was further down the page and is now scrolling back toward the top).
+        // Both should restore the intro.
+        onEnterBack: showIntro,
+        onLeaveBack: showIntro,
+      });
     } else {
       gsap.set(chars, { yPercent: 0, opacity: 1 });
       gsap.set(intro, { opacity: 1, y: 0 });
