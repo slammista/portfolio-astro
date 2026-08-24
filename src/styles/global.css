@@ -10,7 +10,7 @@
   --accent: #ff3b30;
   --border: rgba(243, 241, 234, 0.14);
   --border-strong: rgba(243, 241, 234, 0.28);
-  --font-display: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "Courier New", Courier, monospace;
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
