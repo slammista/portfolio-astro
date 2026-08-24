@@ -178,6 +178,7 @@ const lastName = "Aslam";
   const section = document.querySelector<HTMLElement>(".cinema");
   const pin = document.querySelector<HTMLElement>(".cinema-pin");
   const canvas = document.querySelector<HTMLCanvasElement>(".cinema-canvas");
+  const progressBar = document.querySelector<HTMLElement>(".cinema-progress");
   const progressFill = document.querySelector<HTMLElement>(".cinema-progress-fill");
   const thesis = document.querySelector<HTMLElement>(".cinema-thesis");
   const chars = gsap.utils.toArray<HTMLElement>(".cinema-char");
@@ -364,6 +365,7 @@ const lastName = "Aslam";
         gsap.set(chars, { x: 0, y: 0, rotation: 0, opacity: 1 });
         gsap.set(intro, { opacity: 1, y: 0 });
         gsap.set(thesis, { opacity: 0 });
+        if (progressBar) gsap.set(progressBar, { opacity: 1 });
       };
 
       // A longer pin distance and heavier scrub lag give the sequence room to
@@ -420,6 +422,11 @@ const lastName = "Aslam";
       tl.to(thesis, { opacity: 1, duration: 0.7 }, 2.4);
       tl.to(canvas, { opacity: 0.12, duration: 0.6 }, 3.5);
       tl.to(thesis, { opacity: 0, duration: 0.5 }, 3.6);
+      // The progress bar sits at the very bottom edge of the pin, right where
+      // "Chi sono" begins once it releases. Fade it out with the rest of the
+      // exit so it's gone before that boundary is ever on screen, rather than
+      // leaving a red line resting directly against the next heading.
+      if (progressBar) tl.to(progressBar, { opacity: 0, duration: 0.4 }, 3.7);
 
       // The intro copy and CTAs are handled outside the scrub: a scrub-driven
       // fade covers only ~12% of a ~2000px+ pin, so a normal flick jumped
