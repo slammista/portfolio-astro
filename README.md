@@ -47,6 +47,9 @@ src/
     Hero.astro
     About.astro
     Experience.astro
+    Studio.astro         # Agentic Game Studio
+    Architecture.astro   # Il pattern generalizzato: living ops, smart building, prototipo vs produzione
+    Projects.astro
     Skills.astro
     Contact.astro
     Footer.astro

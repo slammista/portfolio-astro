@@ -1,0 +1,825 @@
+---
+// The section that follows Agentic Game Studio: what the project taught me,
+// and why the same architecture holds outside game pre-production.
+
+const lessons = [
+  {
+    title: "Il limite non è il modello, è il contesto",
+    body: "Un agente che legge tutto sbaglia di più e costa di più. Dare a ogni specialista un solo dominio della Knowledge Base ha reso le risposte più precise e i costi prevedibili.",
+  },
+  {
+    title: "L'autorità va dichiarata, non dedotta",
+    body: "Ogni ruolo ha un perimetro scritto: cosa può leggere, cosa può produrre, a chi risponde. Quando due agenti si contraddicono, decide il Director, non il caso.",
+  },
+  {
+    title: "La validazione è un passaggio, non una speranza",
+    body: "Un prompt migliore non sostituisce un controllo. Cross-domain check e QA sono stadi separati della pipeline: un contenuto non validato non entra nella Knowledge Base.",
+  },
+  {
+    title: "Il modello si sceglie per rischio e costo",
+    body: "Haiku sui task ripetitivi e sul QA, Sonnet dove serve giudizio. Lo stesso criterio vale per qualsiasi dominio: il modello più capace solo dove l'errore costa.",
+  },
+  {
+    title: "L'umano approva, in batch",
+    body: "Il Director non rilegge ogni passaggio: approva i risultati validati a lotti. È il punto in cui l'automazione resta governabile senza diventare un collo di bottiglia.",
+  },
+];
+
+const principles = [
+  { code: "01", name: "Orchestratore unico", detail: "Un punto che classifica, smista e arbitra. Gli specialisti non si chiamano a vicenda." },
+  { code: "02", name: "Specialisti a contesto limitato", detail: "Ogni agente vede solo il dominio che gli serve: meno rumore, meno superficie di errore." },
+  { code: "03", name: "Fonte di verità condivisa", detail: "Lo stato vive in una Knowledge Base strutturata, non nella memoria di una conversazione." },
+  { code: "04", name: "Validazione come gate", detail: "Controlli espliciti tra la proposta e l'azione: coerenza, policy, sicurezza." },
+  { code: "05", name: "Routing per rischio", detail: "Modelli leggeri sul volume, modelli forti sulle decisioni." },
+  { code: "06", name: "Approvazione umana sul punto critico", detail: "L'umano interviene dove l'azione è costosa o irreversibile, non dappertutto." },
+];
+
+const stages = [
+  { key: "input", name: "Input" },
+  { key: "orchestrator", name: "Orchestrator" },
+  { key: "specialists", name: "Specialists" },
+  { key: "validation", name: "Validation" },
+  { key: "action", name: "Action" },
+];
+
+// One row per domain: the five stages filled in with what they mean there.
+const domains = [
+  {
+    code: "game",
+    name: "Agentic Game Studio",
+    kind: "Il prototipo, costruito",
+    scenario: "Una richiesta di design attraversa lo studio e diventa documentazione approvata.",
+    steps: {
+      input: { title: "Richiesta creativa", detail: "\"Progetta la fazione dei mercanti del nord\"" },
+      orchestrator: { title: "Game Director", detail: "Scompone la richiesta e la assegna ai reparti competenti" },
+      specialists: { title: "53 agenti, 8 reparti", detail: "Lore, quest, sistemi, dialoghi: ognuno sul proprio dominio" },
+      validation: { title: "Cross-domain + QA", detail: "Coerenza con il mondo di gioco, controllo qualità e sicurezza" },
+      action: { title: "Knowledge Base", detail: "Il Director approva in batch, il contenuto viene archiviato" },
+    },
+  },
+  {
+    code: "living",
+    name: "Living operations",
+    kind: "Scenario applicato, CX Living",
+    scenario: "Una segnalazione di un residente diventa un intervento pianificato e una risposta chiara, con un responsabile umano sulle decisioni che costano.",
+    steps: {
+      input: { title: "Segnalazione residente", detail: "\"Il riscaldamento dell'appartamento 4B non funziona\", da app, email o chat" },
+      orchestrator: { title: "Operations orchestrator", detail: "Classifica tipo e urgenza, recupera unità, contratto e storico ticket" },
+      specialists: { title: "Triage, policy, fornitori, comunicazione", detail: "Diagnosi probabile, chi paga secondo contratto, fornitore disponibile, bozza di risposta" },
+      validation: { title: "Policy, SLA, soglie", detail: "Regole contrattuali, tempi di servizio, limite di spesa, nessun dato personale fuori perimetro" },
+      action: { title: "Ticket e risposta", detail: "Ticket aperto sul gestionale, intervento proposto; sopra soglia approva il property manager" },
+    },
+  },
+  {
+    code: "building",
+    name: "Smart Building",
+    kind: "Scenario applicato",
+    scenario: "Un'anomalia letta dai sensori diventa una diagnosi e un'azione correttiva, senza che un agente tocchi mai direttamente un impianto critico.",
+    steps: {
+      input: { title: "Eventi da BMS e sensori", detail: "Consumo HVAC anomalo al piano 3, temperature fuori range, allarmi" },
+      orchestrator: { title: "Building orchestrator", detail: "Correla e deduplica gli eventi, decide quali specialisti coinvolgere" },
+      specialists: { title: "Energia, HVAC, occupazione, manutenzione", detail: "Analisi dei consumi, diagnosi dell'impianto, presenze reali, piano d'intervento" },
+      validation: { title: "Vincoli fisici e di sicurezza", detail: "Setpoint entro range, comfort minimo garantito, impianti safety-critical esclusi, simulazione prima dell'invio" },
+      action: { title: "Work order o setpoint", detail: "Ordine di lavoro al facility team; modifiche al BMS solo via API autorizzate e reversibili" },
+    },
+  },
+];
+
+// The honest part: what the prototype gets away with, and what production needs.
+const gaps = [
+  {
+    area: "Security",
+    proto: "Un solo utente fidato, in locale, dentro Claude Code. Gli input arrivano da chi ha costruito il sistema.",
+    prod: "Ogni input esterno è non fidato: difese da prompt injection, segreti in un vault, agenti senza credenziali dirette, dati personali minimizzati e mascherati (GDPR).",
+  },
+  {
+    area: "Permissions",
+    proto: "Il perimetro di ogni agente è definito nelle sue istruzioni e nella struttura della Knowledge Base.",
+    prod: "Least privilege applicato dal sistema, non dal prompt: identità di servizio per agente, scope per edificio e unità, allowlist degli strumenti, lettura separata dalla scrittura.",
+  },
+  {
+    area: "Observability",
+    proto: "Si osserva l'output finale e, se serve, si rilegge la conversazione.",
+    prod: "Tracing di ogni richiesta attraverso tutti gli stadi, metriche di latenza, costo e token per agente, eval continue su casi reali, alert quando la qualità deriva.",
+  },
+  {
+    area: "Audit",
+    proto: "La storia vive nei file Markdown della Knowledge Base e nel versionamento del repository.",
+    prod: "Log append-only per ogni decisione: input, contesto recuperato, versione di prompt e modello, esito della validazione, chi ha approvato. Ogni azione è ricostruibile.",
+  },
+  {
+    area: "Human-in-the-loop",
+    proto: "Il Director approva in batch tutto ciò che entra nella Knowledge Base.",
+    prod: "Approvazione proporzionata al rischio: soglie di spesa, azioni irreversibili, comunicazioni sensibili. Escalation con il contesto già pronto, interfaccia di revisione per l'operatore.",
+  },
+  {
+    area: "API boundaries",
+    proto: "Gli agenti scrivono file: il raggio d'azione è il repository.",
+    prod: "Nessun accesso diretto a database, gestionale o BMS: solo API tipizzate, output validato contro schema, chiavi di idempotenza, rate limit, modalità dry-run.",
+  },
+  {
+    area: "Failure handling",
+    proto: "Se un passaggio fallisce, lo si rilancia a mano.",
+    prod: "Timeout, retry con backoff, circuit breaker, coda dei falliti. Se il modello non risponde, il ticket si apre comunque e il caso passa a un operatore.",
+  },
+];
+
+const rollout = [
+  { name: "Shadow", detail: "Gli agenti propongono, nessuno esegue. Si misura la qualità contro le decisioni reali." },
+  { name: "Assist", detail: "Le proposte arrivano all'operatore come bozze da accettare o correggere." },
+  { name: "Act con approvazione", detail: "Le azioni a basso rischio partono dopo un clic, le altre restano umane." },
+  { name: "Autonomia limitata", detail: "Solo le classi di azione con metriche stabili, reversibili e sotto soglia." },
+];
+---
+<section id="architecture" class="arch">
+  <div class="arch-inner">
+    <p class="arch-tag" data-reveal>Oltre il gaming</p>
+    <h2 data-reveal>Lo stesso pattern, altri domini.</h2>
+    <p class="arch-claim" data-reveal>
+      Agentic Game Studio non è un'architettura per videogiochi. È un modo di trasformare richieste
+      ambigue in azioni verificate, con ruoli chiari e un umano sul punto critico. Il dominio cambia,
+      la struttura resta.
+    </p>
+
+    <!-- 01: what building the studio taught me -->
+    <div class="block">
+      <div class="block-head" data-reveal>
+        <span class="block-num">01</span>
+        <h3 class="block-title">Cosa ho imparato costruendolo</h3>
+      </div>
+      <ol class="lessons">
+        {lessons.map((l) => (
+          <li class="lesson" data-reveal>
+            <h4 class="lesson-title">{l.title}</h4>
+            <p class="lesson-body">{l.body}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <!-- 02: the principles that survive a change of domain -->
+    <div class="block">
+      <div class="block-head" data-reveal>
+        <span class="block-num">02</span>
+        <h3 class="block-title">I principi che si portano altrove</h3>
+      </div>
+      <ul class="principles">
+        {principles.map((p) => (
+          <li class="principle" data-reveal>
+            <span class="principle-code">{p.code}</span>
+            <span class="principle-name">{p.name}</span>
+            <span class="principle-detail">{p.detail}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- 03: one pipeline, three domains -->
+    <div class="block">
+      <div class="block-head" data-reveal>
+        <span class="block-num">03</span>
+        <h3 class="block-title">Input, Orchestrator, Specialists, Validation, Action</h3>
+      </div>
+      <p class="block-lede" data-reveal>
+        Cinque stadi, sempre nello stesso ordine. Cambia il dominio per vedere come si riempiono.
+      </p>
+
+      <figure class="pattern" data-reveal>
+        <div class="tabs" role="tablist" aria-label="Dominio di applicazione">
+          {domains.map((d, i) => (
+            <button
+              class="tab"
+              type="button"
+              role="tab"
+              id={`tab-${d.code}`}
+              data-domain={d.code}
+              aria-selected={i === 0 ? "true" : "false"}
+              aria-controls={`panel-${d.code}`}
+              tabindex={i === 0 ? 0 : -1}
+            >
+              <span class="tab-kind">{d.kind}</span>
+              <span class="tab-name">{d.name}</span>
+            </button>
+          ))}
+        </div>
+
+        <!-- All panels are in the DOM up front and toggled with [hidden], as in the studio diagram. -->
+        {domains.map((d, i) => (
+          <div
+            class="panel"
+            role="tabpanel"
+            id={`panel-${d.code}`}
+            aria-labelledby={`tab-${d.code}`}
+            hidden={i !== 0}
+          >
+            <p class="panel-scenario">{d.scenario}</p>
+            <ol class="pipe">
+              {stages.map((s, j) => (
+                <li class={`stage stage--${s.key}`} data-stage>
+                  <span class="stage-index">{String(j + 1).padStart(2, "0")}</span>
+                  <span class="stage-name">{s.name}</span>
+                  <span class="stage-title">{d.steps[s.key as keyof typeof d.steps].title}</span>
+                  <span class="stage-detail">{d.steps[s.key as keyof typeof d.steps].detail}</span>
+                  {j < stages.length - 1 && <span class="stage-link" aria-hidden="true"><i></i></span>}
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </figure>
+    </div>
+
+    <!-- 04: prototype versus production -->
+    <div class="block">
+      <div class="block-head" data-reveal>
+        <span class="block-num">04</span>
+        <h3 class="block-title">Prototipo e produzione non sono la stessa cosa</h3>
+      </div>
+      <p class="block-lede" data-reveal>
+        Il pattern è riutilizzabile, l'implementazione no. Un sistema che apre ticket, parla con i
+        residenti o muove un impianto richiede garanzie che un prototipo personale non deve avere.
+        Questa è la distanza, voce per voce.
+      </p>
+
+      <div class="gap-table" role="table" aria-label="Prototipo e produzione a confronto" data-reveal>
+        <div class="gap-row gap-row--head" role="row">
+          <span role="columnheader">Area</span>
+          <span role="columnheader">Prototipo, Agentic Game Studio</span>
+          <span role="columnheader">Produzione, living ops e smart building</span>
+        </div>
+        {gaps.map((g) => (
+          <div class="gap-row" role="row">
+            <span class="gap-area" role="rowheader">{g.area}</span>
+            <span class="gap-cell gap-cell--proto" role="cell">
+              <span class="gap-label" aria-hidden="true">Prototipo</span>
+              {g.proto}
+            </span>
+            <span class="gap-cell gap-cell--prod" role="cell">
+              <span class="gap-label" aria-hidden="true">Produzione</span>
+              {g.prod}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <div class="rollout">
+        <p class="rollout-lede" data-reveal>
+          Per questo non partirei dall'autonomia. Partirei dall'osservazione, e allargherei il perimetro
+          solo dove i numeri lo giustificano.
+        </p>
+        <ol class="rollout-steps">
+          {rollout.map((r, i) => (
+            <li class="rollout-step" data-reveal>
+              <span class="rollout-index">Fase {i + 1}</span>
+              <span class="rollout-name">{r.name}</span>
+              <span class="rollout-detail">{r.detail}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .arch {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .arch-inner {
+    width: 90%;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 7rem 0;
+  }
+
+  .arch-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .arch h2 {
+    text-wrap: balance;
+  }
+
+  .arch-claim {
+    font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+    max-width: 58ch;
+    text-wrap: pretty;
+  }
+
+  /* ---------- Numbered blocks ---------- */
+
+  .block {
+    margin-top: 6rem;
+  }
+
+  .block-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-strong);
+    margin-bottom: 2.5rem;
+  }
+
+  .block-num {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .block-title {
+    font-size: clamp(1.4rem, 3vw, 2.1rem);
+    margin-bottom: 0;
+    text-wrap: balance;
+  }
+
+  .block-lede {
+    color: var(--muted);
+    max-width: 62ch;
+    margin-bottom: 2.5rem;
+    text-wrap: pretty;
+  }
+
+  /* ---------- 01 Lessons ---------- */
+
+  .lessons {
+    list-style: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem 4rem;
+    counter-reset: lesson;
+  }
+  @media (min-width: 820px) {
+    .lessons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  .lesson {
+    position: relative;
+    padding-left: 1.1rem;
+  }
+  .lesson::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 5px;
+    height: 5px;
+    background: var(--accent);
+  }
+
+  .lesson-title {
+    font-size: 1.15rem;
+    margin-bottom: 0.6rem;
+    line-height: 1.25;
+  }
+
+  .lesson-body {
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  /* ---------- 02 Principles ---------- */
+
+  .principles {
+    list-style: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  @media (min-width: 640px) {
+    .principles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 980px) {
+    .principles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  .principle {
+    background: var(--bg);
+    padding: 1.6rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    border-top: 2px solid transparent;
+    transition: border-color 0.25s, background 0.25s;
+  }
+  .principle:hover {
+    background: var(--bg-elevated);
+    border-top-color: var(--accent);
+  }
+
+  .principle-code {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+  }
+
+  .principle-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+    line-height: 1.25;
+  }
+
+  .principle-detail {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  /* ---------- 03 Pattern ---------- */
+
+  .pattern {
+    margin: 0;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  @media (min-width: 700px) {
+    .tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  .tab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    padding: 1.1rem 1.1rem;
+    background: var(--bg);
+    border: none;
+    border-top: 2px solid transparent;
+    color: var(--fg);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .tab:hover {
+    background: var(--bg-elevated);
+  }
+  .tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .tab[aria-selected="true"] {
+    background: var(--accent);
+    border-top-color: var(--accent);
+    color: var(--on-accent);
+  }
+  .tab[aria-selected="true"] .tab-kind {
+    color: var(--on-accent);
+  }
+
+  .tab-kind {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--accent);
+  }
+
+  .tab-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  .panel {
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 2rem 1.25rem 2.25rem;
+  }
+  .panel[hidden] {
+    display: none;
+  }
+  @media (min-width: 700px) {
+    .panel { padding: 2.25rem 2rem 2.5rem; }
+  }
+
+  .panel-scenario {
+    color: var(--muted);
+    margin-bottom: 2rem;
+    text-wrap: pretty;
+  }
+
+  /* Vertical on small screens, a left-to-right pipe on wide ones. */
+  .pipe {
+    list-style: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.25rem;
+  }
+  @media (min-width: 1000px) {
+    .pipe {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
+
+  .stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.1rem 1.1rem 1.25rem;
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+  }
+  .stage--orchestrator,
+  .stage--validation {
+    border-color: var(--accent);
+  }
+  .stage.is-lit {
+    background: var(--bg-elevated);
+  }
+
+  .stage-index {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .stage-name {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+
+  .stage-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.02rem;
+    line-height: 1.25;
+    margin-top: 0.2rem;
+  }
+
+  .stage-detail {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Connectors: the same hairline-with-accent-fill as the studio diagram. */
+  .stage-link {
+    position: absolute;
+    display: block;
+    background: var(--border-strong);
+    overflow: hidden;
+    left: 50%;
+    bottom: -2.25rem;
+    width: 1px;
+    height: 2.25rem;
+  }
+  .stage-link i {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  @media (min-width: 1000px) {
+    .stage-link {
+      left: auto;
+      right: -1.5rem;
+      bottom: auto;
+      top: 50%;
+      width: 1.5rem;
+      height: 1px;
+    }
+    .stage-link i {
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+  }
+
+  /* ---------- 04 Prototype vs production ---------- */
+
+  .gap-table {
+    border: 1px solid var(--border);
+  }
+
+  .gap-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.9rem;
+    padding: 1.5rem 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+  .gap-row:first-child {
+    border-top: none;
+  }
+  @media (min-width: 860px) {
+    .gap-row {
+      grid-template-columns: 11rem minmax(0, 0.85fr) minmax(0, 1.15fr);
+      gap: 2rem;
+      padding: 1.4rem 1.5rem;
+    }
+  }
+
+  .gap-row--head {
+    display: none;
+  }
+  @media (min-width: 860px) {
+    .gap-row--head {
+      display: grid;
+      background: var(--bg-elevated);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+    }
+    .gap-row--head span:last-child {
+      color: var(--accent);
+    }
+  }
+
+  .gap-area {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  .gap-cell {
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .gap-cell--proto {
+    color: var(--muted);
+  }
+  .gap-cell--prod {
+    color: var(--fg);
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--accent);
+  }
+
+  /* On narrow screens the header row is gone, so each cell names itself. */
+  .gap-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+  }
+  .gap-cell--prod .gap-label {
+    color: var(--accent);
+  }
+  @media (min-width: 860px) {
+    .gap-label { display: none; }
+  }
+
+  .rollout {
+    margin-top: 4rem;
+  }
+
+  .rollout-lede {
+    font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+    max-width: 58ch;
+    margin-bottom: 2rem;
+    text-wrap: pretty;
+  }
+
+  .rollout-steps {
+    list-style: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  @media (min-width: 640px) {
+    .rollout-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 980px) {
+    .rollout-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+
+  .rollout-step {
+    background: var(--bg);
+    padding: 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .rollout-index {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--accent);
+  }
+
+  .rollout-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .rollout-detail {
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tab,
+    .principle { transition: none; }
+  }
+</style>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const pattern = document.querySelector<HTMLElement>(".pattern");
+  const tabs = gsap.utils.toArray<HTMLButtonElement>(".pattern [role='tab']");
+  const panels = gsap.utils.toArray<HTMLElement>(".pattern [role='tabpanel']");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const wide = window.matchMedia("(min-width: 1000px)");
+
+  /* ---- The signal runs through the five stages of the visible panel ---- */
+  function run(panel: HTMLElement) {
+    const stages = gsap.utils.toArray<HTMLElement>("[data-stage]", panel);
+    const links = gsap.utils.toArray<HTMLElement>(".stage-link i", panel);
+    const axis = wide.matches ? "scaleX" : "scaleY";
+
+    gsap.killTweensOf(links);
+    stages.forEach((s) => s.classList.remove("is-lit"));
+    gsap.set(links, { scaleX: wide.matches ? 0 : 1, scaleY: wide.matches ? 1 : 0 });
+
+    if (reduceMotion) {
+      gsap.set(links, { scaleX: 1, scaleY: 1 });
+      stages.forEach((s) => s.classList.add("is-lit"));
+      return;
+    }
+
+    const tl = gsap.timeline({ defaults: { ease: "none" } });
+    stages.forEach((stage, i) => {
+      const at = i * 0.32;
+      tl.call(() => stage.classList.add("is-lit"), [], at);
+      if (links[i]) tl.to(links[i], { [axis]: 1, duration: 0.26 }, at + 0.04);
+    });
+  }
+
+  function select(code: string, focus = false) {
+    tabs.forEach((tab) => {
+      const on = tab.dataset.domain === code;
+      tab.setAttribute("aria-selected", String(on));
+      tab.tabIndex = on ? 0 : -1;
+      if (on && focus) tab.focus();
+    });
+    panels.forEach((panel) => {
+      panel.hidden = panel.id !== `panel-${code}`;
+      if (!panel.hidden) run(panel);
+    });
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener("click", () => select(tab.dataset.domain ?? ""));
+    // Arrow keys move between tabs, as the ARIA tabs pattern expects.
+    tab.addEventListener("keydown", (e) => {
+      const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+      if (!step) return;
+      e.preventDefault();
+      const next = tabs[(i + step + tabs.length) % tabs.length];
+      select(next.dataset.domain ?? "", true);
+    });
+  });
+
+  if (pattern) {
+    // First pass when the diagram scrolls into view, then on every tab switch.
+    ScrollTrigger.create({
+      trigger: pattern,
+      start: "top 70%",
+      once: true,
+      onEnter: () => {
+        const open = panels.find((p) => !p.hidden);
+        if (open) run(open);
+      },
+    });
+    wide.addEventListener("change", () => {
+      const open = panels.find((p) => !p.hidden);
+      if (open) run(open);
+    });
+  }
+</script>
